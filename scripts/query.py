@@ -1,0 +1,1 @@
+"""Query CLI placeholder."""

@@ -1,0 +1,43 @@
+llm:
+  provider: openai
+  model: gpt-5.5
+  api_key: ${OPENAI_API_KEY}
+
+embedding:
+  provider: openai
+  model: text-embedding-ada-002
+  dimensions: 1536
+  api_key: ${OPENAI_API_KEY}
+
+vision_llm:
+  enabled: true
+  provider: openai
+  model: gpt-4o
+  api_key: ${OPENAI_API_KEY}
+  max_image_size: 2048
+
+vector_store:
+  provider: chroma
+  persist_directory: ./data/db/chroma
+  collection_name: knowledge_hub
+
+retrieval:
+  dense_top_k: 20
+  sparse_top_k: 20
+  fusion_top_k: 10
+  rrf_k: 60
+
+rerank:
+  enabled: false
+  provider: none
+  model: ""
+  top_k: 5
+
+evaluation:
+  enabled: false
+  provider: custom
+
+observability:
+  log_level: INFO
+  trace_enabled: true
+  trace_file: ./logs/traces.jsonl

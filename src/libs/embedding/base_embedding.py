@@ -1,0 +1,1 @@
+"""Embedding base placeholder."""

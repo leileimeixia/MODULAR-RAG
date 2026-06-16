@@ -1,0 +1,1 @@
+"""Splitter base placeholder."""
