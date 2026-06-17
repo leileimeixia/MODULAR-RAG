@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -57,6 +57,13 @@ class RetrievalSettings:
 
 
 @dataclass(frozen=True)
+class SplitterSettings:
+    provider: str = "recursive"
+    chunk_size: int = 1000
+    chunk_overlap: int = 200
+
+
+@dataclass(frozen=True)
 class RerankSettings:
     enabled: bool
     provider: str
@@ -87,6 +94,7 @@ class Settings:
     rerank: RerankSettings
     evaluation: EvaluationSettings
     observability: ObservabilitySettings
+    splitter: SplitterSettings = field(default_factory=SplitterSettings)
 
 
 _ENV_PATTERN = re.compile(r"^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$")
@@ -125,6 +133,9 @@ def validate_settings(settings: Settings) -> None:
         ("retrieval.sparse_top_k", settings.retrieval.sparse_top_k),
         ("retrieval.fusion_top_k", settings.retrieval.fusion_top_k),
         ("retrieval.rrf_k", settings.retrieval.rrf_k),
+        ("splitter.provider", settings.splitter.provider),
+        ("splitter.chunk_size", settings.splitter.chunk_size),
+        ("splitter.chunk_overlap", settings.splitter.chunk_overlap),
         ("rerank.enabled", settings.rerank.enabled),
         ("rerank.provider", settings.rerank.provider),
         ("evaluation.enabled", settings.evaluation.enabled),
@@ -139,6 +150,10 @@ def validate_settings(settings: Settings) -> None:
 
     if settings.embedding.dimensions <= 0:
         raise SettingsError("embedding.dimensions must be greater than 0")
+    if settings.splitter.chunk_size <= 0:
+        raise SettingsError("splitter.chunk_size must be greater than 0")
+    if settings.splitter.chunk_overlap < 0:
+        raise SettingsError("splitter.chunk_overlap must be greater than or equal to 0")
 
 
 def _parse_settings(raw: dict[str, Any]) -> Settings:
@@ -151,6 +166,7 @@ def _parse_settings(raw: dict[str, Any]) -> Settings:
         rerank=RerankSettings(**_section(raw, "rerank")),
         evaluation=EvaluationSettings(**_section(raw, "evaluation")),
         observability=ObservabilitySettings(**_section(raw, "observability")),
+        splitter=SplitterSettings(**raw.get("splitter", {})),
     )
 
 

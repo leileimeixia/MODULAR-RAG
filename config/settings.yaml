@@ -27,6 +27,11 @@ retrieval:
   fusion_top_k: 10
   rrf_k: 60
 
+splitter:
+  provider: recursive
+  chunk_size: 1000
+  chunk_overlap: 200
+
 rerank:
   enabled: false
   provider: none
