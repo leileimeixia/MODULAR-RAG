@@ -52,8 +52,8 @@
 | B1 | LLM 抽象接口与工厂 | [x] | 2026-06-17 | BaseLLM + LLMFactory 注册/创建机制 + 单元测试 |
 | B2 | Embedding 抽象接口与工厂 | [x] | 2026-06-17 | BaseEmbedding + EmbeddingFactory 注册/创建机制 + 单元测试 |
 | B3 | Splitter 抽象接口与工厂 | [x] | 2026-06-17 | BaseSplitter + SplitterFactory 注册/创建机制 + 单元测试 |
-| B4 | VectorStore 抽象接口与工厂 | [ ] | | |
-| B5 | Reranker 抽象接口与工厂（含 None 回退） | [ ] | | |
+| B4 | VectorStore 抽象接口与工厂 | [x] | 2026-06-17 | BaseVectorStore + VectorStoreFactory + 契约测试 |
+| B5 | Reranker 抽象接口与工厂（含 None 回退） | [x] | 2026-06-17 | BaseReranker + RerankerFactory + NoneReranker 回退 + 单元测试 |
 | B6 | Evaluator 抽象接口与工厂 | [ ] | | |
 | B7.1 | OpenAI-Compatible LLM 实现 | [ ] | | |
 | B7.2 | Ollama LLM 实现 | [ ] | | |
@@ -157,7 +157,7 @@
 | 阶段 | 总任务数 | 已完成 | 进度 |
 |------|---------|--------|------|
 | 阶段 A | 3 | 3 | 100% |
-| 阶段 B | 16 | 3 | 19% |
+| 阶段 B | 16 | 5 | 31% |
 | 阶段 C | 15 | 0 | 0% |
 | 阶段 D | 7 | 0 | 0% |
 | 阶段 E | 6 | 0 | 0% |
@@ -165,7 +165,7 @@
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **6** | **9%** |
+| **总计** | **68** | **8** | **12%** |
 
 
 ---
