@@ -2,14 +2,27 @@
 
 from __future__ import annotations
 
+from core.settings import SettingsError, load_settings
+from observability.logger import get_logger
+
 
 def main() -> int:
-    """Run the server entry point placeholder.
+    """Load settings and run the server entry point placeholder."""
+    logger = get_logger(__name__)
+    try:
+        settings = load_settings()
+    except SettingsError as exc:
+        logger.error("Configuration error: %s", exc)
+        return 1
 
-    The actual MCP stdio server is scheduled for stage E. Stage A keeps this
-    entry point importable and executable so the project has a stable root.
-    """
-    print("Modular RAG MCP Server skeleton is ready.")
+    logger.info(
+        "Config OK: LLM=%s/%s, Embed=%s/%s",
+        settings.llm.provider,
+        settings.llm.model,
+        settings.embedding.provider,
+        settings.embedding.model,
+    )
+    print("Modular RAG MCP Server configuration loaded.")
     return 0
 
 
