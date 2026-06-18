@@ -61,3 +61,14 @@ def _normalize_provider(provider: str) -> str:
     if not provider or not provider.strip():
         raise LLMFactoryError("LLM provider must be a non-empty string")
     return provider.strip().lower().replace("_", "-")
+
+
+from .azure_llm import AzureLLM
+from .deepseek_llm import DeepSeekLLM
+from .openai_llm import OpenAILLM
+
+
+LLMFactory.register("azure", AzureLLM)
+LLMFactory.register("azure-openai", AzureLLM)
+LLMFactory.register("deepseek", DeepSeekLLM)
+LLMFactory.register("openai", OpenAILLM)
