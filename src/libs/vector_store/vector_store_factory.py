@@ -65,3 +65,9 @@ def _normalize_provider(provider: str) -> str:
     if not provider or not provider.strip():
         raise VectorStoreFactoryError("Vector store provider must be a non-empty string")
     return provider.strip().lower().replace("_", "-")
+
+
+from .chroma_store import ChromaStore
+
+
+VectorStoreFactory.register("chroma", ChromaStore)

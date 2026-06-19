@@ -60,7 +60,7 @@
 | B7.3 | OpenAI & Azure Embedding 实现 | [x] | 2026-06-19 | OpenAI/Azure embedding provider + mock HTTP 单元测试 |
 | B7.4 | Ollama Embedding 实现 | [x] | 2026-06-19 | Ollama 本地 /api/embed provider + mock HTTP 单元测试 |
 | B7.5 | Recursive Splitter 默认实现 | [x] | 2026-06-19 | 本地 RecursiveSplitter 默认实现 + Markdown/overlap 单元测试 |
-| B7.6 | ChromaStore 默认实现 | [ ] | | |
+| B7.6 | ChromaStore 默认实现 | [x] | 2026-06-19 | 本地持久化 ChromaStore adapter + upsert/query roundtrip 集成测试 |
 | B7.7 | LLM Reranker 实现 | [ ] | | |
 | B7.8 | Cross-Encoder Reranker 实现 | [ ] | | |
 | B8 | Vision LLM 抽象接口与工厂集成 | [ ] | | |
@@ -157,7 +157,7 @@
 | 阶段 | 总任务数 | 已完成 | 进度 |
 |------|---------|--------|------|
 | 阶段 A | 3 | 3 | 100% |
-| 阶段 B | 16 | 11 | 69% |
+| 阶段 B | 16 | 12 | 75% |
 | 阶段 C | 15 | 0 | 0% |
 | 阶段 D | 7 | 0 | 0% |
 | 阶段 E | 6 | 0 | 0% |
@@ -165,7 +165,7 @@
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **14** | **21%** |
+| **总计** | **68** | **15** | **22%** |
 
 
 ---
