@@ -63,3 +63,9 @@ def _normalize_provider(provider: str) -> str:
     if not provider or not provider.strip():
         raise SplitterFactoryError("Splitter provider must be a non-empty string")
     return provider.strip().lower().replace("_", "-")
+
+
+from .recursive_splitter import RecursiveSplitter
+
+
+SplitterFactory.register("recursive", RecursiveSplitter)
