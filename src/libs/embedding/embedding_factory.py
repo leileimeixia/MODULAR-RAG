@@ -68,9 +68,11 @@ def _normalize_provider(provider: str) -> str:
 
 
 from .azure_embedding import AzureEmbedding
+from .ollama_embedding import OllamaEmbedding
 from .openai_embedding import OpenAIEmbedding
 
 
 EmbeddingFactory.register("azure", AzureEmbedding)
 EmbeddingFactory.register("azure-openai", AzureEmbedding)
+EmbeddingFactory.register("ollama", OllamaEmbedding)
 EmbeddingFactory.register("openai", OpenAIEmbedding)
