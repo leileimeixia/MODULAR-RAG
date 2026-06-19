@@ -57,7 +57,7 @@
 | B6 | Evaluator 抽象接口与工厂 | [x] | 2026-06-18 | BaseEvaluator + EvaluatorFactory + CustomEvaluator hit_rate/mrr/precision + 单元测试 |
 | B7.1 | OpenAI-Compatible LLM 实现 | [x] | 2026-06-18 | OpenAI/Azure/DeepSeek OpenAI-compatible HTTP 客户端 + mock 单元测试 |
 | B7.2 | Ollama LLM 实现 | [x] | 2026-06-19 | Ollama 本地 /api/chat provider + mock HTTP 单元测试 |
-| B7.3 | OpenAI & Azure Embedding 实现 | [ ] | | |
+| B7.3 | OpenAI & Azure Embedding 实现 | [x] | 2026-06-19 | OpenAI/Azure embedding provider + mock HTTP 单元测试 |
 | B7.4 | Ollama Embedding 实现 | [ ] | | |
 | B7.5 | Recursive Splitter 默认实现 | [ ] | | |
 | B7.6 | ChromaStore 默认实现 | [ ] | | |
@@ -157,7 +157,7 @@
 | 阶段 | 总任务数 | 已完成 | 进度 |
 |------|---------|--------|------|
 | 阶段 A | 3 | 3 | 100% |
-| 阶段 B | 16 | 8 | 50% |
+| 阶段 B | 16 | 9 | 56% |
 | 阶段 C | 15 | 0 | 0% |
 | 阶段 D | 7 | 0 | 0% |
 | 阶段 E | 6 | 0 | 0% |
@@ -165,7 +165,7 @@
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **11** | **16%** |
+| **总计** | **68** | **12** | **18%** |
 
 
 ---

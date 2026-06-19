@@ -65,3 +65,12 @@ def _normalize_provider(provider: str) -> str:
     if not provider or not provider.strip():
         raise EmbeddingFactoryError("Embedding provider must be a non-empty string")
     return provider.strip().lower().replace("_", "-")
+
+
+from .azure_embedding import AzureEmbedding
+from .openai_embedding import OpenAIEmbedding
+
+
+EmbeddingFactory.register("azure", AzureEmbedding)
+EmbeddingFactory.register("azure-openai", AzureEmbedding)
+EmbeddingFactory.register("openai", OpenAIEmbedding)
