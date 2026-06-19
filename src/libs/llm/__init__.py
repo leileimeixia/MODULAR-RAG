@@ -4,6 +4,7 @@ from .azure_llm import AzureLLM
 from .base_llm import BaseLLM, LLMResponse, Message
 from .deepseek_llm import DeepSeekLLM
 from .llm_factory import LLMFactory, LLMFactoryError
+from .ollama_llm import OllamaLLM
 from .openai_llm import LLMProviderError, OpenAICompatibleLLM, OpenAILLM
 
 __all__ = [
@@ -15,6 +16,7 @@ __all__ = [
     "LLMProviderError",
     "LLMResponse",
     "Message",
+    "OllamaLLM",
     "OpenAICompatibleLLM",
     "OpenAILLM",
 ]
