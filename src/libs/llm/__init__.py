@@ -1,6 +1,7 @@
 """LLM abstractions."""
 
 from .azure_llm import AzureLLM
+from .azure_vision_llm import AzureVisionLLM
 from .base_llm import BaseLLM, LLMResponse, Message
 from .base_vision_llm import BaseVisionLLM, ImageInput, VisionLLMResponse
 from .deepseek_llm import DeepSeekLLM
@@ -10,6 +11,7 @@ from .openai_llm import LLMProviderError, OpenAICompatibleLLM, OpenAILLM
 
 __all__ = [
     "AzureLLM",
+    "AzureVisionLLM",
     "BaseLLM",
     "BaseVisionLLM",
     "DeepSeekLLM",

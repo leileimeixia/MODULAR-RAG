@@ -111,6 +111,7 @@ def _normalize_provider(provider: str) -> str:
 
 
 from .azure_llm import AzureLLM
+from .azure_vision_llm import AzureVisionLLM
 from .deepseek_llm import DeepSeekLLM
 from .ollama_llm import OllamaLLM
 from .openai_llm import OpenAILLM
@@ -121,3 +122,5 @@ LLMFactory.register("azure-openai", AzureLLM)
 LLMFactory.register("deepseek", DeepSeekLLM)
 LLMFactory.register("ollama", OllamaLLM)
 LLMFactory.register("openai", OpenAILLM)
+LLMFactory.register_vision("azure", AzureVisionLLM)
+LLMFactory.register_vision("azure-openai", AzureVisionLLM)
