@@ -8,6 +8,7 @@ from typing import Any
 from core.settings import RerankSettings, Settings
 
 from .base_reranker import BaseReranker
+from .cross_encoder_reranker import CrossEncoderReranker
 from .llm_reranker import LLMReranker
 from .none_reranker import NoneReranker
 
@@ -23,6 +24,7 @@ class RerankerFactory:
     """Create reranker implementations from project settings."""
 
     _registry: dict[str, RerankerCreator] = {
+        "cross-encoder": CrossEncoderReranker,
         "llm": LLMReranker,
         "none": NoneReranker,
     }
