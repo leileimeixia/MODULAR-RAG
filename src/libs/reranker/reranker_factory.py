@@ -8,6 +8,7 @@ from typing import Any
 from core.settings import RerankSettings, Settings
 
 from .base_reranker import BaseReranker
+from .llm_reranker import LLMReranker
 from .none_reranker import NoneReranker
 
 
@@ -22,6 +23,7 @@ class RerankerFactory:
     """Create reranker implementations from project settings."""
 
     _registry: dict[str, RerankerCreator] = {
+        "llm": LLMReranker,
         "none": NoneReranker,
     }
 
