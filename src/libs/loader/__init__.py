@@ -1,5 +1,6 @@
 """Loader abstractions."""
 
+from .base_loader import BaseLoader, LoaderError
 from .file_integrity import (
     DEFAULT_DB_PATH,
     FileIntegrityChecker,
@@ -7,11 +8,15 @@ from .file_integrity import (
     SQLiteIntegrityChecker,
     compute_sha256,
 )
+from .pdf_loader import PdfLoader
 
 __all__ = [
+    "BaseLoader",
     "DEFAULT_DB_PATH",
     "FileIntegrityChecker",
     "FileIntegrityError",
+    "LoaderError",
+    "PdfLoader",
     "SQLiteIntegrityChecker",
     "compute_sha256",
 ]
