@@ -1,0 +1,7 @@
+{
+  "typical_noise_scenario": "Header: Confidential\n\nThis is useful content.   It has   extra spaces.\n\nPage 1\n---\nFooter: internal",
+  "excessive_whitespace": "Alpha     beta\t\tgamma\n\n\n\nDelta",
+  "format_markers": "<!-- comment -->\n<p>Important <b>content</b></p>\n====\nKeep this.",
+  "code_blocks": "Before\n\n```python\ndef hello():\n    return 'world'\n```\n\nAfter",
+  "clean_text": "Clean paragraph with useful content."
+}

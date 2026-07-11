@@ -74,7 +74,7 @@
 | C2 | 文件完整性检查（SHA256） | [x] | 2026-06-22 | SQLiteIntegrityChecker + SHA256 计算 + WAL 并发写入单元测试 |
 | C3 | Loader 抽象基类与 PDF Loader | [x] | 2026-06-23 | BaseLoader + PdfLoader 文本 PDF 解析契约与安全降级 |
 | C4 | Splitter 集成（调用 Libs） | [x] | 2026-06-23 | DocumentChunker 适配 Document->Chunk，稳定 ID/metadata/source_ref/图片引用分发 |
-| C5 | Transform 基类 + ChunkRefiner | [ ] | | |
+| C5 | Transform 基类 + ChunkRefiner | [x] | 2026-07-11 | BaseTransform + ChunkRefiner 规则去噪/Mock LLM/失败降级 + TraceContext 占位 |
 | C6 | MetadataEnricher | [ ] | | |
 | C7 | ImageCaptioner | [ ] | | |
 | C8 | DenseEncoder | [ ] | | |
@@ -158,14 +158,14 @@
 |------|---------|--------|------|
 | 阶段 A | 3 | 3 | 100% |
 | 阶段 B | 16 | 16 | 100% |
-| 阶段 C | 15 | 4 | 27% |
+| 阶段 C | 15 | 5 | 33% |
 | 阶段 D | 7 | 0 | 0% |
 | 阶段 E | 6 | 0 | 0% |
 | 阶段 F | 5 | 0 | 0% |
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **23** | **34%** |
+| **总计** | **68** | **24** | **35%** |
 
 
 ---

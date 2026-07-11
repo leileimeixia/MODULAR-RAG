@@ -1,1 +1,4 @@
 Refine this chunk for retrieval while preserving factual content, citations, and source context.
+
+Chunk:
+{text}
