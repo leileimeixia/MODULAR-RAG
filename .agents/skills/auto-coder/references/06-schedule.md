@@ -77,7 +77,7 @@
 | C5 | Transform 基类 + ChunkRefiner | [x] | 2026-07-11 | BaseTransform + ChunkRefiner 规则去噪/Mock LLM/失败降级 + TraceContext 占位 |
 | C6 | MetadataEnricher | [x] | 2026-07-11 | MetadataEnricher 规则 title/summary/tags + Mock LLM JSON 增强与降级 |
 | C7 | ImageCaptioner | [x] | 2026-07-11 | ImageCaptioner Mock Vision LLM caption 写回 + 禁用/异常降级 |
-| C8 | DenseEncoder | [ ] | | |
+| C8 | DenseEncoder | [x] | 2026-07-12 | DenseEncoder 批量调用 BaseEmbedding 生成 ChunkRecord dense_vector + 形状校验 |
 | C9 | SparseEncoder | [ ] | | |
 | C10 | BatchProcessor | [ ] | | |
 | C11 | BM25Indexer（倒排索引+IDF计算） | [ ] | | |
@@ -158,14 +158,14 @@
 |------|---------|--------|------|
 | 阶段 A | 3 | 3 | 100% |
 | 阶段 B | 16 | 16 | 100% |
-| 阶段 C | 15 | 7 | 47% |
+| 阶段 C | 15 | 8 | 53% |
 | 阶段 D | 7 | 0 | 0% |
 | 阶段 E | 6 | 0 | 0% |
 | 阶段 F | 5 | 0 | 0% |
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **26** | **38%** |
+| **总计** | **68** | **27** | **40%** |
 
 
 ---
