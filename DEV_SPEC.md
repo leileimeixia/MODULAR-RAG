@@ -1992,7 +1992,7 @@ dashboard:
 | C10 | BatchProcessor | [x] | 2026-07-12 | BatchProcessor 按 batch_size 编排 dense/sparse 编码并合并 ChunkRecord |
 | C11 | BM25Indexer（倒排索引+IDF计算） | [x] | 2026-07-12 | BM25Indexer 构建/加载 pickle 倒排索引，支持 IDF、查询、重建与增量更新 |
 | C12 | VectorUpserter（幂等upsert） | [x] | 2026-07-12 | VectorUpserter 将 dense ChunkRecord 转 VectorRecord 并幂等调用 BaseVectorStore.upsert |
-| C13 | ImageStorage（图片存储+SQLite索引） | [ ] | | |
+| C13 | ImageStorage（图片存储+SQLite索引） | [x] | 2026-07-12 | ImageStorage 保存图片文件并用 SQLite/WAL 维护 image_id→path 索引 |
 | C14 | Pipeline 编排（MVP 串起来） | [ ] | | |
 | C15 | 脚本入口 ingest.py | [ ] | | |
 
@@ -2068,14 +2068,14 @@ dashboard:
 |------|---------|--------|------|
 | 阶段 A | 3 | 3 | 100% |
 | 阶段 B | 16 | 16 | 100% |
-| 阶段 C | 15 | 12 | 80% |
+| 阶段 C | 15 | 13 | 87% |
 | 阶段 D | 7 | 0 | 0% |
 | 阶段 E | 6 | 0 | 0% |
 | 阶段 F | 5 | 0 | 0% |
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **31** | **46%** |
+| **总计** | **68** | **32** | **47%** |
 
 
 ---
