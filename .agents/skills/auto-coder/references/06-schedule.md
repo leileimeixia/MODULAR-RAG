@@ -79,7 +79,7 @@
 | C7 | ImageCaptioner | [x] | 2026-07-11 | ImageCaptioner Mock Vision LLM caption 写回 + 禁用/异常降级 |
 | C8 | DenseEncoder | [x] | 2026-07-12 | DenseEncoder 批量调用 BaseEmbedding 生成 ChunkRecord dense_vector + 形状校验 |
 | C9 | SparseEncoder | [x] | 2026-07-12 | SparseEncoder 输出 BM25 term frequency ChunkRecord sparse_vector + 空文本空向量行为 |
-| C10 | BatchProcessor | [ ] | | |
+| C10 | BatchProcessor | [x] | 2026-07-12 | BatchProcessor 按 batch_size 编排 dense/sparse 编码并合并 ChunkRecord |
 | C11 | BM25Indexer（倒排索引+IDF计算） | [ ] | | |
 | C12 | VectorUpserter（幂等upsert） | [ ] | | |
 | C13 | ImageStorage（图片存储+SQLite索引） | [ ] | | |
@@ -158,14 +158,14 @@
 |------|---------|--------|------|
 | 阶段 A | 3 | 3 | 100% |
 | 阶段 B | 16 | 16 | 100% |
-| 阶段 C | 15 | 9 | 60% |
+| 阶段 C | 15 | 10 | 67% |
 | 阶段 D | 7 | 0 | 0% |
 | 阶段 E | 6 | 0 | 0% |
 | 阶段 F | 5 | 0 | 0% |
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **28** | **41%** |
+| **总计** | **68** | **29** | **43%** |
 
 
 ---
