@@ -8,6 +8,7 @@ from .types import (
     Document,
     ImageRef,
     Metadata,
+    RetrievalResult,
     SparseVector,
     image_placeholder,
 )
@@ -20,6 +21,7 @@ __all__ = [
     "Document",
     "ImageRef",
     "Metadata",
+    "RetrievalResult",
     "SparseVector",
     "image_placeholder",
 ]

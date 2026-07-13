@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from core import Chunk, ChunkRecord, CoreTypeError, Document, ImageRef, image_placeholder
+from core import Chunk, ChunkRecord, CoreTypeError, Document, ImageRef, RetrievalResult, image_placeholder
 
 
 def test_document_serializes_to_stable_dict_and_json() -> None:
@@ -151,4 +151,33 @@ def test_chunk_record_rejects_bad_vectors() -> None:
             text="hello",
             metadata={"source_path": "docs/sample.md"},
             sparse_vector={"term": "bad"},
+        )
+
+
+def test_retrieval_result_serializes_roundtrip() -> None:
+    result = RetrievalResult(
+        chunk_id="chunk-1",
+        score=0.75,
+        text="retrieved text",
+        metadata={"source_path": "docs/sample.md", "collection": "docs"},
+    )
+
+    payload = result.to_dict()
+
+    assert payload == {
+        "chunk_id": "chunk-1",
+        "score": 0.75,
+        "text": "retrieved text",
+        "metadata": {"source_path": "docs/sample.md", "collection": "docs"},
+    }
+    assert RetrievalResult.from_dict(payload) == result
+
+
+def test_retrieval_result_rejects_invalid_score() -> None:
+    with pytest.raises(CoreTypeError, match="score"):
+        RetrievalResult(
+            chunk_id="chunk-1",
+            score="bad",
+            text="text",
+            metadata={"source_path": "docs/sample.md"},
         )

@@ -196,6 +196,43 @@ class ChunkRecord:
         )
 
 
+@dataclass(frozen=True)
+class RetrievalResult:
+    """Normalized retrieval result returned by dense/sparse/hybrid search."""
+
+    chunk_id: str
+    score: float
+    text: str
+    metadata: Metadata = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        _validate_id(self.chunk_id, "RetrievalResult.chunk_id")
+        if not isinstance(self.score, int | float):
+            raise CoreTypeError("RetrievalResult.score must be numeric")
+        _validate_text(self.text, "RetrievalResult.text")
+        if not isinstance(self.metadata, dict):
+            raise CoreTypeError("RetrievalResult.metadata must be a dictionary")
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to a JSON-compatible dictionary."""
+        return {
+            "chunk_id": self.chunk_id,
+            "score": float(self.score),
+            "text": self.text,
+            "metadata": dict(self.metadata),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Metadata) -> RetrievalResult:
+        """Create a RetrievalResult from a dictionary."""
+        return cls(
+            chunk_id=str(payload["chunk_id"]),
+            score=float(payload["score"]),
+            text=str(payload["text"]),
+            metadata=dict(payload.get("metadata", {})),
+        )
+
+
 class CoreTypeError(ValueError):
     """Raised when shared core data contracts are invalid."""
 

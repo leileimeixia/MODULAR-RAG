@@ -91,7 +91,7 @@
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
 | D1 | QueryProcessor（关键词提取 + filters） | [x] | 2026-07-13 | QueryProcessor 规则提取 keywords，解析通用 inline filters 并支持外部 filters 合并 |
-| D2 | DenseRetriever（调用 VectorStore.query） | [ ] | | |
+| D2 | DenseRetriever（调用 VectorStore.query） | [x] | 2026-07-13 | DenseRetriever 调用 BaseEmbedding 生成 query vector 并映射 VectorStore.query 结果为 RetrievalResult |
 | D3 | SparseRetriever（BM25 查询） | [ ] | | |
 | D4 | RRF Fusion | [ ] | | |
 | D5 | HybridSearch 编排 | [ ] | | |
@@ -159,13 +159,13 @@
 | 阶段 A | 3 | 3 | 100% |
 | 阶段 B | 16 | 16 | 100% |
 | 阶段 C | 15 | 15 | 100% |
-| 阶段 D | 7 | 1 | 14% |
+| 阶段 D | 7 | 2 | 29% |
 | 阶段 E | 6 | 0 | 0% |
 | 阶段 F | 5 | 0 | 0% |
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **35** | **51%** |
+| **总计** | **68** | **36** | **53%** |
 
 
 ---
