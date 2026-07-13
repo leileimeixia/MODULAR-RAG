@@ -142,6 +142,23 @@ def test_get_by_metadata_returns_matching_records(tmp_path) -> None:
     assert [record.id for record in records] == ["a", "b"]
 
 
+def test_get_by_ids_preserves_request_order_and_skips_missing(tmp_path) -> None:
+    store = ChromaStore(_settings(tmp_path))
+    store.upsert(
+        [
+            VectorRecord(id="a", text="alpha", vector=[1.0], metadata={"rank": 1}),
+            VectorRecord(id="b", text="beta", vector=[1.0], metadata={"rank": 2}),
+        ]
+    )
+
+    records = store.get_by_ids(["b", "missing", "a"])
+
+    assert [(record.id, record.text) for record in records] == [
+        ("b", "beta"),
+        ("a", "alpha"),
+    ]
+
+
 def test_query_rejects_dimension_mismatch(tmp_path) -> None:
     store = ChromaStore(_settings(tmp_path))
     store.upsert([VectorRecord(id="a", text="alpha", vector=[1.0, 0.0])])

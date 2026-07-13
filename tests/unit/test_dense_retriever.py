@@ -53,6 +53,9 @@ class FakeVectorStore(BaseVectorStore):
             ),
         ][:top_k]
 
+    def get_by_ids(self, ids: list[str], trace=None) -> list[VectorRecord]:
+        return []
+
 
 def test_dense_retriever_embeds_query_and_calls_vector_store() -> None:
     embedding = FakeEmbedding(vectors=[[0.1, 0.2]])

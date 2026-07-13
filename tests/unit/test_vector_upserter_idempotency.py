@@ -29,6 +29,9 @@ class FakeVectorStore(BaseVectorStore):
     ) -> list[VectorQueryResult]:
         return []
 
+    def get_by_ids(self, ids: list[str], trace=None) -> list[VectorRecord]:
+        return [self.records[record_id] for record_id in ids if record_id in self.records]
+
 
 def _record(index: int, text: str | None = None) -> ChunkRecord:
     text = text if text is not None else f"chunk {index}"

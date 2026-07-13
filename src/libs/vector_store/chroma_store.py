@@ -78,6 +78,22 @@ class ChromaStore(BaseVectorStore):
         """Return all records in deterministic id order."""
         return [self._records[key] for key in sorted(self._records)]
 
+    def get_by_ids(
+        self,
+        ids: list[str],
+        trace: Any | None = None,
+    ) -> list[VectorRecord]:
+        """Return records for existing ids in the same order they were requested."""
+        if not isinstance(ids, list):
+            raise ChromaStoreError("get_by_ids expects a list of ids")
+        if not all(isinstance(item, str) and item for item in ids):
+            raise ChromaStoreError("get_by_ids ids must be non-empty strings")
+        return [
+            self._records[record_id]
+            for record_id in ids
+            if record_id in self._records
+        ]
+
     def get_by_metadata(self, filters: Metadata) -> list[VectorRecord]:
         """Return records whose metadata contains all filter key/value pairs."""
         return [

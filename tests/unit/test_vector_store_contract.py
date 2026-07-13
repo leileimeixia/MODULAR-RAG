@@ -56,6 +56,13 @@ class FakeVectorStore(BaseVectorStore):
             for record in sorted(matched, key=lambda item: item.id)[:top_k]
         ]
 
+    def get_by_ids(self, ids: list[str], trace=None) -> list[VectorRecord]:
+        return [
+            self.records[record_id]
+            for record_id in ids
+            if record_id in self.records
+        ]
+
 
 @pytest.fixture(autouse=True)
 def clean_registry():
@@ -157,6 +164,26 @@ def test_vector_store_contract_upsert_and_query_shape() -> None:
             metadata={"collection": "docs"},
         )
     ]
+
+
+def test_vector_store_contract_get_by_ids_preserves_order_and_skips_missing() -> None:
+    store = FakeVectorStore(
+        VectorStoreSettings(
+            provider="fake",
+            persist_directory="./tmp",
+            collection_name="test",
+        )
+    )
+    store.upsert(
+        [
+            VectorRecord(id="a", text="alpha", vector=[1.0], metadata={}),
+            VectorRecord(id="b", text="beta", vector=[1.0], metadata={}),
+        ]
+    )
+
+    records = store.get_by_ids(["b", "missing", "a"])
+
+    assert [record.id for record in records] == ["b", "a"]
 
 
 def test_factory_rejects_unknown_provider() -> None:
