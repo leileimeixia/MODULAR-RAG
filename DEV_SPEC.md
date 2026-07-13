@@ -1993,7 +1993,7 @@ dashboard:
 | C11 | BM25Indexer（倒排索引+IDF计算） | [x] | 2026-07-12 | BM25Indexer 构建/加载 pickle 倒排索引，支持 IDF、查询、重建与增量更新 |
 | C12 | VectorUpserter（幂等upsert） | [x] | 2026-07-12 | VectorUpserter 将 dense ChunkRecord 转 VectorRecord 并幂等调用 BaseVectorStore.upsert |
 | C13 | ImageStorage（图片存储+SQLite索引） | [x] | 2026-07-12 | ImageStorage 保存图片文件并用 SQLite/WAL 维护 image_id→path 索引 |
-| C14 | Pipeline 编排（MVP 串起来） | [ ] | | |
+| C14 | Pipeline 编排（MVP 串起来） | [x] | 2026-07-12 | IngestionPipeline 串联 integrity/load/split/transform/encode/store 并提供清晰失败阶段 |
 | C15 | 脚本入口 ingest.py | [ ] | | |
 
 #### 阶段 D：Retrieval MVP
@@ -2068,14 +2068,14 @@ dashboard:
 |------|---------|--------|------|
 | 阶段 A | 3 | 3 | 100% |
 | 阶段 B | 16 | 16 | 100% |
-| 阶段 C | 15 | 13 | 87% |
+| 阶段 C | 15 | 14 | 93% |
 | 阶段 D | 7 | 0 | 0% |
 | 阶段 E | 6 | 0 | 0% |
 | 阶段 F | 5 | 0 | 0% |
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **32** | **47%** |
+| **总计** | **68** | **33** | **49%** |
 
 
 ---
