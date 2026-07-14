@@ -96,7 +96,7 @@
 | D4 | RRF Fusion | [x] | 2026-07-13 | RRFusion 按 Reciprocal Rank Fusion 融合 dense/sparse 排名并输出确定性 RetrievalResult |
 | D5 | HybridSearch 编排 | [x] | 2026-07-13 | HybridSearch 编排 QueryProcessor、Dense/Sparse Retriever、RRFusion，并支持 metadata 后置过滤与单路失败降级 |
 | D6 | Reranker（Core 层编排 + Fallback） | [x] | 2026-07-13 | CoreReranker 适配 RetrievalResult 与 libs.reranker 后端，并在后端失败时回退原融合排名 |
-| D7 | 脚本入口 query.py（查询可用） | [ ] | | |
+| D7 | 脚本入口 query.py（查询可用） | [x] | 2026-07-13 | scripts/query.py 支持在线查询、metadata filters、verbose trace 与 --no-rerank 调试模式 |
 
 #### 阶段 E：MCP Server 层与 Tools
 
@@ -159,13 +159,13 @@
 | 阶段 A | 3 | 3 | 100% |
 | 阶段 B | 16 | 16 | 100% |
 | 阶段 C | 15 | 15 | 100% |
-| 阶段 D | 7 | 6 | 86% |
+| 阶段 D | 7 | 7 | 100% |
 | 阶段 E | 6 | 0 | 0% |
 | 阶段 F | 5 | 0 | 0% |
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **40** | **59%** |
+| **总计** | **68** | **41** | **60%** |
 
 
 ---
