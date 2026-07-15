@@ -69,12 +69,14 @@ def test_mcp_server_unknown_method_returns_json_rpc_error() -> None:
     assert "Method not found" in response["error"]["message"]
 
 
-def test_mcp_server_lists_query_knowledge_hub_tool() -> None:
+def test_mcp_server_lists_registered_tools() -> None:
     completed = _run_server(
         [{"jsonrpc": "2.0", "id": 2, "method": "tools/list"}]
     )
 
     response = json.loads(completed.stdout)
     tools = response["result"]["tools"]
-    assert [tool["name"] for tool in tools] == ["query_knowledge_hub"]
-    assert tools[0]["inputSchema"]["required"] == ["query"]
+    tools_by_name = {tool["name"]: tool for tool in tools}
+    assert set(tools_by_name) == {"query_knowledge_hub", "list_collections"}
+    assert tools_by_name["query_knowledge_hub"]["inputSchema"]["required"] == ["query"]
+    assert tools_by_name["list_collections"]["inputSchema"]["properties"] == {}
