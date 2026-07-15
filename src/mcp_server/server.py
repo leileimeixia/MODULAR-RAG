@@ -13,6 +13,7 @@ if __package__ in (None, ""):
         sys.path.insert(0, str(src_root))
 
 from mcp_server.protocol_handler import ProtocolHandler, parse_error_response
+from mcp_server.tools import default_tools
 
 
 def main(
@@ -24,7 +25,7 @@ def main(
     stdin = stdin or sys.stdin
     stdout = stdout or sys.stdout
     stderr = stderr or sys.stderr
-    handler = ProtocolHandler()
+    handler = ProtocolHandler(tools=default_tools())
     _log(stderr, "MCP stdio server starting")
 
     for line in stdin:
