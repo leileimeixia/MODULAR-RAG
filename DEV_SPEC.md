@@ -2013,7 +2013,7 @@ dashboard:
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
 | E1 | MCP Server 入口与 Stdio 约束 | [x] | 2026-07-14 | mcp_server/server.py 提供 JSON-RPC stdio 循环，initialize 响应走 stdout，运行日志走 stderr |
-| E2 | Protocol Handler 协议解析与能力协商 | [ ] | | |
+| E2 | Protocol Handler 协议解析与能力协商 | [x] | 2026-07-14 | ProtocolHandler 封装 JSON-RPC initialize、tools/list、tools/call，并按规范返回错误响应 |
 | E3 | query_knowledge_hub Tool | [ ] | | |
 | E4 | list_collections Tool | [ ] | | |
 | E5 | get_document_summary Tool | [ ] | | |
@@ -2070,12 +2070,12 @@ dashboard:
 | 阶段 B | 16 | 16 | 100% |
 | 阶段 C | 15 | 15 | 100% |
 | 阶段 D | 7 | 7 | 100% |
-| 阶段 E | 6 | 1 | 17% |
+| 阶段 E | 6 | 2 | 33% |
 | 阶段 F | 5 | 0 | 0% |
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **42** | **62%** |
+| **总计** | **68** | **43** | **63%** |
 
 
 ---
