@@ -77,6 +77,11 @@ def test_mcp_server_lists_registered_tools() -> None:
     response = json.loads(completed.stdout)
     tools = response["result"]["tools"]
     tools_by_name = {tool["name"]: tool for tool in tools}
-    assert set(tools_by_name) == {"query_knowledge_hub", "list_collections"}
+    assert set(tools_by_name) == {
+        "query_knowledge_hub",
+        "list_collections",
+        "get_document_summary",
+    }
     assert tools_by_name["query_knowledge_hub"]["inputSchema"]["required"] == ["query"]
     assert tools_by_name["list_collections"]["inputSchema"]["properties"] == {}
+    assert tools_by_name["get_document_summary"]["inputSchema"]["required"] == ["doc_id"]

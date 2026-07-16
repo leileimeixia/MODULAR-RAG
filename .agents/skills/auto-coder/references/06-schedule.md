@@ -106,7 +106,7 @@
 | E2 | Protocol Handler 协议解析与能力协商 | [x] | 2026-07-14 | ProtocolHandler 封装 JSON-RPC initialize、tools/list、tools/call，并按规范返回错误响应 |
 | E3 | query_knowledge_hub Tool | [x] | 2026-07-15 | query_knowledge_hub 调用 HybridSearch + CoreReranker，并返回 Markdown content 与 structuredContent.citations |
 | E4 | list_collections Tool | [x] | 2026-07-15 | list_collections 返回 data/documents 下集合及文档数量、总字节数统计 |
-| E5 | get_document_summary Tool | [ ] | | |
+| E5 | get_document_summary Tool | [x] | 2026-07-15 | get_document_summary 从 BM25 持久化 records 聚合 title、summary、tags，并对缺失 doc_id 返回规范 tool error |
 | E6 | 多模态返回组装（Text + Image） | [ ] | | |
 
 #### 阶段 F：Trace 基础设施与打点
@@ -160,12 +160,12 @@
 | 阶段 B | 16 | 16 | 100% |
 | 阶段 C | 15 | 15 | 100% |
 | 阶段 D | 7 | 7 | 100% |
-| 阶段 E | 6 | 4 | 67% |
+| 阶段 E | 6 | 5 | 83% |
 | 阶段 F | 5 | 0 | 0% |
 | 阶段 G | 6 | 0 | 0% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **45** | **66%** |
+| **总计** | **68** | **46** | **68%** |
 
 
 ---
