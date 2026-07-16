@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from mcp_server.protocol_handler import ProtocolHandler, ToolSpec
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SERVER_PATH = PROJECT_ROOT / "src" / "mcp_server" / "server.py"
@@ -85,3 +87,38 @@ def test_mcp_server_lists_registered_tools() -> None:
     assert tools_by_name["query_knowledge_hub"]["inputSchema"]["required"] == ["query"]
     assert tools_by_name["list_collections"]["inputSchema"]["properties"] == {}
     assert tools_by_name["get_document_summary"]["inputSchema"]["required"] == ["doc_id"]
+
+
+def test_protocol_handler_returns_image_content_from_tool_result() -> None:
+    handler = ProtocolHandler(
+        tools=[
+            ToolSpec(
+                name="image_tool",
+                description="Return image content.",
+                input_schema={"type": "object"},
+                handler=lambda arguments: {
+                    "content": [
+                        {"type": "text", "text": "answer"},
+                        {"type": "image", "mimeType": "image/png", "data": "aW1n"},
+                    ],
+                    "isError": False,
+                },
+            )
+        ]
+    )
+
+    response = handler.handle_message(
+        {
+            "jsonrpc": "2.0",
+            "id": 3,
+            "method": "tools/call",
+            "params": {"name": "image_tool", "arguments": {}},
+        }
+    )
+
+    assert response is not None
+    assert response["result"]["content"][1] == {
+        "type": "image",
+        "mimeType": "image/png",
+        "data": "aW1n",
+    }

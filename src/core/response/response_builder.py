@@ -5,6 +5,7 @@ from __future__ import annotations
 from core import RetrievalResult
 
 from .citation_generator import CitationGenerator
+from .multimodal_assembler import MultimodalAssembler
 
 
 MCPToolResult = dict
@@ -13,8 +14,13 @@ MCPToolResult = dict
 class ResponseBuilder:
     """Build Markdown and structured citations for MCP tool responses."""
 
-    def __init__(self, citation_generator: CitationGenerator | None = None) -> None:
+    def __init__(
+        self,
+        citation_generator: CitationGenerator | None = None,
+        multimodal_assembler: MultimodalAssembler | None = None,
+    ) -> None:
         self.citation_generator = citation_generator or CitationGenerator()
+        self.multimodal_assembler = multimodal_assembler or MultimodalAssembler()
 
     def build(
         self,
@@ -24,8 +30,9 @@ class ResponseBuilder:
         """Return an MCP-compatible tool result."""
         citations = self.citation_generator.generate(retrieval_results)
         markdown = _build_markdown(query, retrieval_results, citations)
+        text_content = [{"type": "text", "text": markdown}]
         return {
-            "content": [{"type": "text", "text": markdown}],
+            "content": self.multimodal_assembler.assemble(text_content, retrieval_results),
             "structuredContent": {
                 "query": query,
                 "citations": citations,
