@@ -6,7 +6,7 @@ import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from core import Document
 from core.trace import TraceCollector, TraceContext
@@ -19,6 +19,7 @@ from .transform import BaseTransform
 
 
 LOGGER = logging.getLogger(__name__)
+ProgressCallback = Callable[[str, int, int], None]
 
 
 class IngestionPipelineError(RuntimeError):
@@ -74,10 +75,13 @@ class IngestionPipeline:
         collection: str = "default",
         force: bool = False,
         trace: TraceContext | None = None,
+        on_progress: ProgressCallback | None = None,
     ) -> IngestionResult:
         """Run the full ingestion pipeline for one source file."""
         source_path = Path(path)
         trace = trace or TraceContext(trace_type="ingestion")
+        total_steps = _total_steps(len(self.transforms))
+        current_step = 0
         file_hash = self._stage(
             "integrity",
             lambda: self.integrity_checker.compute_sha256(source_path),
@@ -85,6 +89,7 @@ class IngestionPipeline:
             method=self.integrity_checker.__class__.__name__,
             details={"source_path": str(source_path)},
         )
+        current_step = _notify_progress(on_progress, "integrity", current_step, total_steps)
 
         if not force and self.integrity_checker.should_skip(file_hash):
             self.logger.info("Skipping unchanged source: %s", source_path)
@@ -94,6 +99,7 @@ class IngestionPipeline:
                 details={"file_hash": file_hash, "source_path": str(source_path)},
             )
             self.trace_collector.collect(trace)
+            _notify_progress(on_progress, "ingestion_skip", current_step, total_steps)
             return IngestionResult(
                 file_hash=file_hash,
                 document_id=None,
@@ -113,6 +119,7 @@ class IngestionPipeline:
                 method=self.loader.__class__.__name__,
                 details={"source_path": str(source_path)},
             )
+            current_step = _notify_progress(on_progress, "load", current_step, total_steps)
             images_saved = self._stage(
                 "image_store",
                 lambda: self._store_document_images(document, collection, file_hash),
@@ -120,6 +127,7 @@ class IngestionPipeline:
                 method=self.image_storage.__class__.__name__,
                 details={"collection": collection, "document_id": document.id},
             )
+            current_step = _notify_progress(on_progress, "image_store", current_step, total_steps)
             chunks = self._stage(
                 "split",
                 lambda: self.chunker.split_document(document),
@@ -127,6 +135,7 @@ class IngestionPipeline:
                 method=self.chunker.__class__.__name__,
                 details={"document_id": document.id},
             )
+            current_step = _notify_progress(on_progress, "split", current_step, total_steps)
             for transform in self.transforms:
                 chunks = self._stage(
                     "transform",
@@ -135,6 +144,12 @@ class IngestionPipeline:
                     method=transform.__class__.__name__,
                     details={"document_id": document.id},
                 )
+                current_step = _notify_progress(
+                    on_progress,
+                    "transform",
+                    current_step,
+                    total_steps,
+                )
             records = self._stage(
                 "embed",
                 lambda: self.batch_processor.process(chunks, trace=None),
@@ -142,6 +157,7 @@ class IngestionPipeline:
                 method=self.batch_processor.__class__.__name__,
                 details={"document_id": document.id, "chunk_count": len(chunks)},
             )
+            current_step = _notify_progress(on_progress, "embed", current_step, total_steps)
             vector_ids = self._stage(
                 "upsert",
                 lambda: self.vector_upserter.upsert(records, trace=None),
@@ -149,6 +165,7 @@ class IngestionPipeline:
                 method=self.vector_upserter.__class__.__name__,
                 details={"document_id": document.id, "record_count": len(records)},
             )
+            current_step = _notify_progress(on_progress, "upsert", current_step, total_steps)
             self._stage(
                 "bm25_index",
                 lambda: self.bm25_indexer.add(records, trace=None),
@@ -156,6 +173,7 @@ class IngestionPipeline:
                 method=self.bm25_indexer.__class__.__name__,
                 details={"document_id": document.id, "record_count": len(records)},
             )
+            current_step = _notify_progress(on_progress, "bm25_index", current_step, total_steps)
             self.integrity_checker.mark_success(
                 file_hash,
                 source_path,
@@ -179,6 +197,7 @@ class IngestionPipeline:
                 },
             )
             self.trace_collector.collect(trace)
+            _notify_progress(on_progress, "ingestion_complete", current_step, total_steps)
             return IngestionResult(
                 file_hash=file_hash,
                 document_id=document.id,
@@ -200,6 +219,7 @@ class IngestionPipeline:
                 },
             )
             self.trace_collector.collect(trace)
+            _notify_progress(on_progress, "ingestion_failed", current_step, total_steps)
             self.integrity_checker.mark_failed(file_hash, str(exc), source_path)
             if isinstance(exc, IngestionPipelineError):
                 raise
@@ -284,3 +304,19 @@ def _result_details(result: Any) -> dict[str, Any]:
     if isinstance(result, Document):
         return {"document_id": result.id, "text_length": len(result.text)}
     return {}
+
+
+def _total_steps(transform_count: int) -> int:
+    return 7 + transform_count
+
+
+def _notify_progress(
+    on_progress: ProgressCallback | None,
+    stage_name: str,
+    current: int,
+    total: int,
+) -> int:
+    next_current = min(current + 1, total)
+    if on_progress is not None:
+        on_progress(stage_name, next_current, total)
+    return next_current
