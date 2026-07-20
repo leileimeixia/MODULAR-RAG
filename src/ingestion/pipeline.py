@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from core import Document
-from core.trace import TraceContext
+from core.trace import TraceCollector, TraceContext
 from libs.loader import PdfLoader, SQLiteIntegrityChecker
 
 from .chunking import DocumentChunker
@@ -52,6 +53,7 @@ class IngestionPipeline:
         vector_upserter: Any | None = None,
         bm25_indexer: Any | None = None,
         image_storage: Any | None = None,
+        trace_collector: TraceCollector | None = None,
         logger: logging.Logger | None = None,
     ) -> None:
         self.settings = settings
@@ -63,6 +65,7 @@ class IngestionPipeline:
         self.vector_upserter = vector_upserter or VectorUpserter(settings=settings)
         self.bm25_indexer = bm25_indexer or BM25Indexer()
         self.image_storage = image_storage or ImageStorage()
+        self.trace_collector = trace_collector or _trace_collector(settings)
         self.logger = logger or LOGGER
 
     def run(
@@ -74,11 +77,13 @@ class IngestionPipeline:
     ) -> IngestionResult:
         """Run the full ingestion pipeline for one source file."""
         source_path = Path(path)
-        trace = trace or TraceContext()
+        trace = trace or TraceContext(trace_type="ingestion")
         file_hash = self._stage(
             "integrity",
             lambda: self.integrity_checker.compute_sha256(source_path),
             trace,
+            method=self.integrity_checker.__class__.__name__,
+            details={"source_path": str(source_path)},
         )
 
         if not force and self.integrity_checker.should_skip(file_hash):
@@ -88,6 +93,7 @@ class IngestionPipeline:
                 method="integrity",
                 details={"file_hash": file_hash, "source_path": str(source_path)},
             )
+            self.trace_collector.collect(trace)
             return IngestionResult(
                 file_hash=file_hash,
                 document_id=None,
@@ -100,30 +106,56 @@ class IngestionPipeline:
             )
 
         try:
-            document = self._stage("load", lambda: self.loader.load(source_path), trace)
+            document = self._stage(
+                "load",
+                lambda: self.loader.load(source_path),
+                trace,
+                method=self.loader.__class__.__name__,
+                details={"source_path": str(source_path)},
+            )
             images_saved = self._stage(
                 "image_store",
-                lambda: self._store_document_images(document, collection, file_hash, trace),
+                lambda: self._store_document_images(document, collection, file_hash),
                 trace,
+                method=self.image_storage.__class__.__name__,
+                details={"collection": collection, "document_id": document.id},
             )
-            chunks = self._stage("split", lambda: self.chunker.split_document(document), trace)
+            chunks = self._stage(
+                "split",
+                lambda: self.chunker.split_document(document),
+                trace,
+                method=self.chunker.__class__.__name__,
+                details={"document_id": document.id},
+            )
             for transform in self.transforms:
                 chunks = self._stage(
-                    f"transform:{transform.__class__.__name__}",
-                    lambda transform=transform, chunks=chunks: transform.transform(chunks, trace=trace),
+                    "transform",
+                    lambda transform=transform, chunks=chunks: transform.transform(chunks, trace=None),
                     trace,
+                    method=transform.__class__.__name__,
+                    details={"document_id": document.id},
                 )
             records = self._stage(
-                "encode",
-                lambda: self.batch_processor.process(chunks, trace=trace),
+                "embed",
+                lambda: self.batch_processor.process(chunks, trace=None),
                 trace,
+                method=self.batch_processor.__class__.__name__,
+                details={"document_id": document.id, "chunk_count": len(chunks)},
             )
             vector_ids = self._stage(
-                "vector_upsert",
-                lambda: self.vector_upserter.upsert(records, trace=trace),
+                "upsert",
+                lambda: self.vector_upserter.upsert(records, trace=None),
                 trace,
+                method=self.vector_upserter.__class__.__name__,
+                details={"document_id": document.id, "record_count": len(records)},
             )
-            self._stage("bm25_index", lambda: self.bm25_indexer.add(records, trace=trace), trace)
+            self._stage(
+                "bm25_index",
+                lambda: self.bm25_indexer.add(records, trace=None),
+                trace,
+                method=self.bm25_indexer.__class__.__name__,
+                details={"document_id": document.id, "record_count": len(records)},
+            )
             self.integrity_checker.mark_success(
                 file_hash,
                 source_path,
@@ -146,6 +178,7 @@ class IngestionPipeline:
                     "image_count": images_saved,
                 },
             )
+            self.trace_collector.collect(trace)
             return IngestionResult(
                 file_hash=file_hash,
                 document_id=document.id,
@@ -157,18 +190,52 @@ class IngestionPipeline:
                 trace=trace,
             )
         except Exception as exc:
+            trace.record_stage(
+                "ingestion_failed",
+                method="pipeline",
+                details={
+                    "file_hash": file_hash,
+                    "source_path": str(source_path),
+                    "error": exc.__class__.__name__,
+                },
+            )
+            self.trace_collector.collect(trace)
             self.integrity_checker.mark_failed(file_hash, str(exc), source_path)
             if isinstance(exc, IngestionPipelineError):
                 raise
             raise IngestionPipelineError(f"pipeline failed: {exc}") from exc
 
-    def _stage(self, name: str, action, trace: TraceContext):
+    def _stage(
+        self,
+        name: str,
+        action,
+        trace: TraceContext,
+        method: str,
+        details: dict[str, Any] | None = None,
+    ):
         self.logger.info("Starting ingestion stage: %s", name)
+        started_at = time.perf_counter()
         try:
             result = action()
         except Exception as exc:
             self.logger.error("Ingestion stage failed: %s", name)
+            trace.record_stage(
+                name,
+                method=method,
+                details={
+                    **(details or {}),
+                    "failed": True,
+                    "error": exc.__class__.__name__,
+                },
+                elapsed_ms=(time.perf_counter() - started_at) * 1000,
+            )
             raise IngestionPipelineError(f"pipeline failed during {name}: {exc}") from exc
+        trace.record_stage(
+            name,
+            method=method,
+            details={**(details or {}), **_result_details(result), "failed": False},
+            elapsed_ms=(time.perf_counter() - started_at) * 1000,
+        )
         self.logger.info("Finished ingestion stage: %s", name)
         return result
 
@@ -177,7 +244,6 @@ class IngestionPipeline:
         document: Document,
         collection: str,
         file_hash: str,
-        trace: TraceContext,
     ) -> int:
         count = 0
         for image in document.images():
@@ -189,7 +255,7 @@ class IngestionPipeline:
                     collection=collection,
                     doc_hash=file_hash,
                     page_num=image.page,
-                    trace=trace,
+                    trace=None,
                 )
                 count += 1
         return count
@@ -201,3 +267,20 @@ def _require_settings(settings: Any | None, factory):
             f"{factory.__name__} requires settings when no explicit component is injected"
         )
     return factory(settings)
+
+
+def _trace_collector(settings: Any | None) -> TraceCollector:
+    observability = getattr(settings, "observability", None)
+    trace_enabled = bool(getattr(observability, "trace_enabled", False))
+    trace_file = getattr(observability, "trace_file", None)
+    return TraceCollector(trace_file=trace_file, persist=trace_enabled)
+
+
+def _result_details(result: Any) -> dict[str, Any]:
+    if isinstance(result, list):
+        return {"item_count": len(result)}
+    if isinstance(result, int):
+        return {"count": result}
+    if isinstance(result, Document):
+        return {"document_id": result.id, "text_length": len(result.text)}
+    return {}

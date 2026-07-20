@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from core import Chunk, ChunkRecord, Document
+from core.trace import TraceCollector
 from ingestion import IngestionPipeline, IngestionPipelineError
 
 
@@ -187,6 +188,7 @@ def _pipeline(tmp_path, **overrides):
         "vector_upserter": FakeVectorUpserter(),
         "bm25_indexer": FakeBM25Indexer(),
         "image_storage": FakeImageStorage(),
+        "trace_collector": TraceCollector(),
     }
     components.update(overrides)
     return IngestionPipeline(**components), components
@@ -211,6 +213,15 @@ def test_ingestion_pipeline_runs_full_orchestration(tmp_path) -> None:
     assert components["image_storage"].saved[0]["collection"] == "docs"
     assert components["integrity_checker"].successes[0]["metadata"]["record_count"] == 2
     assert result.trace.stages[-1].name == "ingestion_complete"
+    assert result.trace.trace_type == "ingestion"
+    stages = {stage.name: stage for stage in result.trace.stages}
+    for stage_name in ["load", "split", "transform", "embed", "upsert"]:
+        assert stage_name in stages
+        assert stages[stage_name].method
+        assert stages[stage_name].elapsed_ms >= 0
+    assert stages["embed"].details["chunk_count"] == 2
+    assert stages["upsert"].details["record_count"] == 2
+    assert components["trace_collector"].traces[-1]["trace_type"] == "ingestion"
 
 
 def test_ingestion_pipeline_skips_when_integrity_says_processed(tmp_path) -> None:
@@ -226,6 +237,8 @@ def test_ingestion_pipeline_skips_when_integrity_says_processed(tmp_path) -> Non
     assert result.skipped is True
     assert components["loader"].calls == []
     assert result.trace.stages[-1].name == "ingestion_skip"
+    assert result.trace.finished_at is not None
+    assert components["trace_collector"].traces[-1]["stages"][-1]["name"] == "ingestion_skip"
 
 
 def test_ingestion_pipeline_force_ignores_skip(tmp_path) -> None:
@@ -257,3 +270,5 @@ def test_ingestion_pipeline_marks_failure_with_clear_stage(tmp_path) -> None:
 
     assert len(integrity.failures) == 1
     assert "loader exploded" in integrity.failures[0]["error"]
+    assert pipeline.trace_collector.traces[-1]["stages"][-1]["name"] == "ingestion_failed"
+    assert pipeline.trace_collector.traces[-1]["trace_type"] == "ingestion"
