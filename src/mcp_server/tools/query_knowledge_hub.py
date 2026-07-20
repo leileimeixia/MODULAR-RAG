@@ -7,6 +7,7 @@ from typing import Any
 from core.query_engine import CoreReranker, HybridSearch
 from core.response import ResponseBuilder
 from core.settings import load_settings
+from core.trace import TraceCollector, TraceContext
 from mcp_server.protocol_handler import ToolSpec
 
 
@@ -38,6 +39,7 @@ def query_knowledge_hub(
     hybrid_search: HybridSearch | None = None,
     reranker: CoreReranker | None = None,
     response_builder: ResponseBuilder | None = None,
+    trace_collector: TraceCollector | None = None,
 ) -> dict[str, Any]:
     """Run hybrid search and rerank, then return an MCP tool result."""
     query = _query(arguments)
@@ -47,10 +49,15 @@ def query_knowledge_hub(
     hybrid_search = hybrid_search or HybridSearch(settings=settings)
     reranker = reranker or CoreReranker(settings=settings)
     response_builder = response_builder or ResponseBuilder()
+    trace = TraceContext(trace_type="query")
+    trace_collector = trace_collector or _trace_collector(settings)
 
-    candidates = hybrid_search.search(query, top_k=top_k, filters=filters)
-    results = reranker.rerank(query, candidates, top_k=top_k)
-    return response_builder.build(results, query)
+    candidates = hybrid_search.search(query, top_k=top_k, filters=filters, trace=trace)
+    results = reranker.rerank(query, candidates, top_k=top_k, trace=trace)
+    response = response_builder.build(results, query)
+    trace_collector.collect(trace)
+    response.setdefault("structuredContent", {})["trace"] = trace_collector.traces[-1]
+    return response
 
 
 def tool_spec() -> ToolSpec:
@@ -86,3 +93,10 @@ def _filters(arguments: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(collection, str) or not collection.strip():
         raise ValueError("query_knowledge_hub collection must be a non-empty string")
     return {"collection": collection.strip()}
+
+
+def _trace_collector(settings: Any) -> TraceCollector:
+    observability = getattr(settings, "observability", None)
+    trace_enabled = bool(getattr(observability, "trace_enabled", False))
+    trace_file = getattr(observability, "trace_file", None)
+    return TraceCollector(trace_file=trace_file, persist=trace_enabled)

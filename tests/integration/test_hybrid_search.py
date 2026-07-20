@@ -217,9 +217,19 @@ def test_hybrid_search_records_trace_stage() -> None:
     results = search.search("alpha", top_k=2, trace=trace)
 
     assert [result.chunk_id for result in results] == ["dense-a", "sparse-a"]
-    assert trace.stages[-1].name == "hybrid_search"
-    assert trace.stages[-1].method == "HybridSearch"
-    assert trace.stages[-1].details == {
+    stages = {stage.name: stage for stage in trace.stages}
+    assert list(stages) == [
+        "query_processing",
+        "dense_retrieval",
+        "sparse_retrieval",
+        "fusion",
+        "hybrid_search",
+    ]
+    for stage in stages.values():
+        assert stage.method
+        assert stage.elapsed_ms >= 0
+    assert stages["hybrid_search"].method == "HybridSearch"
+    assert stages["hybrid_search"].details == {
         "top_k": 2,
         "dense_count": 1,
         "sparse_count": 1,
@@ -229,6 +239,7 @@ def test_hybrid_search_records_trace_stage() -> None:
         "dense_failed": False,
         "sparse_failed": False,
     }
+    assert trace.to_dict()["trace_type"] == "query"
 
 
 def test_hybrid_search_rejects_invalid_inputs() -> None:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from typing import Any
 
 from core import RetrievalResult
@@ -38,18 +39,22 @@ class CoreReranker:
         if limit < 0:
             raise CoreRerankerError("top_k must be greater than or equal to 0")
         if limit == 0 or not candidates:
+            started_at = time.perf_counter()
             self._record_trace(trace, limit, len(candidates), 0, fallback=False)
+            _set_latest_stage_elapsed(trace, started_at)
             return []
 
+        started_at = time.perf_counter()
         try:
             rerank_results = self.backend.rerank(
                 query.strip(),
                 _to_rerank_candidates(candidates),
                 top_k=limit,
-                trace=trace,
+                trace=None,
             )
             results = _to_retrieval_results(rerank_results)
             self._record_trace(trace, limit, len(candidates), len(results), fallback=False)
+            _set_latest_stage_elapsed(trace, started_at)
             return results
         except Exception as exc:  # noqa: BLE001 - rerank failure should degrade safely.
             fallback_results = candidates[:limit]
@@ -61,6 +66,7 @@ class CoreReranker:
                 fallback=True,
                 error=exc,
             )
+            _set_latest_stage_elapsed(trace, started_at)
             return fallback_results
 
     def _record_trace(
@@ -121,3 +127,8 @@ def _to_retrieval_results(results: list[RerankResult]) -> list[RetrievalResult]:
         )
         for result in results
     ]
+
+
+def _set_latest_stage_elapsed(trace: Any | None, started_at: float) -> None:
+    if trace is not None and getattr(trace, "stages", None):
+        trace.stages[-1].elapsed_ms = (time.perf_counter() - started_at) * 1000

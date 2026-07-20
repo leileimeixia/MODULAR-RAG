@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable
 
@@ -47,36 +48,66 @@ class HybridSearch:
         if filters is not None and not isinstance(filters, dict):
             raise HybridSearchError("filters must be a dictionary")
 
-        processed = self.query_processor.process(query, filters=filters, trace=trace)
+        start = time.perf_counter()
+        processed = self.query_processor.process(query, filters=filters, trace=None)
+        _record_timed_stage(
+            trace,
+            "query_processing",
+            method=self.query_processor.__class__.__name__,
+            started_at=start,
+            details={
+                "keyword_count": len(processed.keywords),
+                "filter_keys": sorted(processed.filters),
+            },
+        )
         dense_top_k = _retrieval_top_k(self.settings, "dense_top_k", top_k)
         sparse_top_k = _retrieval_top_k(self.settings, "sparse_top_k", top_k)
         fusion_top_k = max(_retrieval_top_k(self.settings, "fusion_top_k", top_k), top_k)
 
         dense_results, dense_error = self._run_route(
+            "dense_retrieval",
+            self.dense_retriever.__class__.__name__,
             lambda: self.dense_retriever.retrieve(
                 processed.query,
                 top_k=dense_top_k,
                 filters=processed.filters,
-                trace=trace,
-            )
+                trace=None,
+            ),
+            trace,
         )
         sparse_results, sparse_error = self._run_route(
+            "sparse_retrieval",
+            self.sparse_retriever.__class__.__name__,
             lambda: self.sparse_retriever.retrieve(
                 processed.keywords,
                 top_k=sparse_top_k,
-                trace=trace,
-            )
+                trace=None,
+            ),
+            trace,
         )
         if dense_error is not None and sparse_error is not None:
             raise HybridSearchError(
                 "both dense and sparse retrieval failed"
             ) from dense_error
 
+        start = time.perf_counter()
         fused = self.fusion.fuse(
             dense_results,
             sparse_results,
             top_k=fusion_top_k,
-            trace=trace,
+            trace=None,
+        )
+        _record_timed_stage(
+            trace,
+            "fusion",
+            method=self.fusion.__class__.__name__,
+            started_at=start,
+            details={
+                "top_k": fusion_top_k,
+                "dense_count": len(dense_results),
+                "sparse_count": len(sparse_results),
+                "result_count": len(fused),
+            },
         )
         filtered = self._apply_metadata_filters(fused, processed.filters)
         results = filtered[:top_k]
@@ -115,13 +146,36 @@ class HybridSearch:
 
     def _run_route(
         self,
+        stage_name: str,
+        method: str,
         route: Callable[[], list[RetrievalResult]],
+        trace: Any | None = None,
     ) -> tuple[list[RetrievalResult], Exception | None]:
         with ThreadPoolExecutor(max_workers=1) as executor:
+            start = time.perf_counter()
             future = executor.submit(route)
             try:
-                return future.result(), None
+                results = future.result()
+                _record_timed_stage(
+                    trace,
+                    stage_name,
+                    method=method,
+                    started_at=start,
+                    details={"result_count": len(results), "failed": False},
+                )
+                return results, None
             except Exception as exc:  # noqa: BLE001 - route failures degrade gracefully.
+                _record_timed_stage(
+                    trace,
+                    stage_name,
+                    method=method,
+                    started_at=start,
+                    details={
+                        "result_count": 0,
+                        "failed": True,
+                        "error": exc.__class__.__name__,
+                    },
+                )
                 return [], exc
 
 
@@ -129,3 +183,19 @@ def _retrieval_top_k(settings: Any | None, field_name: str, default: int) -> int
     retrieval = getattr(settings, "retrieval", None)
     value = int(getattr(retrieval, field_name, default))
     return value if value > 0 else default
+
+
+def _record_timed_stage(
+    trace: Any | None,
+    stage_name: str,
+    method: str,
+    started_at: float,
+    details: dict[str, Any],
+) -> None:
+    if trace is not None:
+        trace.record_stage(
+            stage_name,
+            method=method,
+            details=details,
+            elapsed_ms=(time.perf_counter() - started_at) * 1000,
+        )
