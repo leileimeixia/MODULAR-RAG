@@ -78,6 +78,27 @@ class ChromaStore(BaseVectorStore):
         """Return all records in deterministic id order."""
         return [self._records[key] for key in sorted(self._records)]
 
+    def get_collection_stats(self) -> dict[str, Any]:
+        """Return lightweight collection statistics for dashboard views."""
+        records = self.get_all()
+        sources = {
+            str(source)
+            for record in records
+            for source in (
+                record.metadata.get("source_path"),
+                record.metadata.get("source"),
+            )
+            if source
+        }
+        return {
+            "collection_name": self.settings.collection_name,
+            "provider": self.settings.provider,
+            "persist_directory": str(self.persist_directory),
+            "collection_file": str(self.collection_file),
+            "record_count": len(records),
+            "source_count": len(sources),
+        }
+
     def get_by_ids(
         self,
         ids: list[str],
