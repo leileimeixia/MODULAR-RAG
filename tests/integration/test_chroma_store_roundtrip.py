@@ -142,6 +142,31 @@ def test_get_by_metadata_returns_matching_records(tmp_path) -> None:
     assert [record.id for record in records] == ["a", "b"]
 
 
+def test_delete_by_metadata_removes_matching_records(tmp_path) -> None:
+    store = ChromaStore(_settings(tmp_path))
+    store.upsert(
+        [
+            VectorRecord(
+                id="a",
+                text="alpha",
+                vector=[1.0],
+                metadata={"source_path": "same.md"},
+            ),
+            VectorRecord(
+                id="b",
+                text="beta",
+                vector=[1.0],
+                metadata={"source_path": "other.md"},
+            ),
+        ]
+    )
+
+    deleted = store.delete_by_metadata({"source_path": "same.md"})
+
+    assert deleted == 1
+    assert [record.id for record in store.get_all()] == ["b"]
+
+
 def test_get_by_ids_preserves_request_order_and_skips_missing(tmp_path) -> None:
     store = ChromaStore(_settings(tmp_path))
     store.upsert(

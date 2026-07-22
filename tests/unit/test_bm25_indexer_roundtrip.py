@@ -84,6 +84,27 @@ def test_bm25_indexer_add_replaces_records_incrementally(tmp_path) -> None:
     assert [result["chunk_id"] for result in indexer.query("gamma")] == ["chunk-a"]
 
 
+def test_bm25_indexer_remove_document_rebuilds_index(tmp_path) -> None:
+    indexer = BM25Indexer(index_dir=tmp_path)
+    indexer.build(
+        [
+            _record("chunk-a", {"alpha": 1.0}),
+            ChunkRecord(
+                id="chunk-b",
+                text="beta",
+                metadata={"source_path": "docs/other.md"},
+                sparse_vector={"beta": 1.0},
+            ),
+        ]
+    )
+
+    removed = indexer.remove_document(source_path="docs/sample.md")
+
+    assert removed == 1
+    assert indexer.query("alpha") == []
+    assert [result["chunk_id"] for result in indexer.query("beta")] == ["chunk-b"]
+
+
 def test_bm25_indexer_handles_empty_sparse_vectors(tmp_path) -> None:
     indexer = BM25Indexer(index_dir=tmp_path)
 

@@ -123,6 +123,21 @@ class ChromaStore(BaseVectorStore):
             if _matches_filters(record.metadata, filters)
         ]
 
+    def delete_by_metadata(self, filters: Metadata) -> int:
+        """Delete records whose metadata contains all filter key/value pairs."""
+        if not isinstance(filters, dict) or not filters:
+            raise ChromaStoreError("delete_by_metadata filters must be a non-empty dictionary")
+        matched_ids = [
+            record.id
+            for record in self.get_all()
+            if _matches_filters(record.metadata, filters)
+        ]
+        for record_id in matched_ids:
+            self._records.pop(record_id, None)
+        if matched_ids:
+            self._persist_records()
+        return len(matched_ids)
+
     def _load_records(self) -> dict[str, VectorRecord]:
         if not self.collection_file.exists():
             return {}

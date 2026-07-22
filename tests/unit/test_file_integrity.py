@@ -51,6 +51,19 @@ def test_mark_success_makes_hash_skippable(tmp_path) -> None:
     assert record["metadata"] == {"collection": "default"}
 
 
+def test_list_processed_and_remove_record(tmp_path) -> None:
+    db_path = tmp_path / "ingestion_history.db"
+    checker = SQLiteIntegrityChecker(db_path)
+    checker.mark_success("hash-a", "a.pdf", metadata={"collection": "docs"})
+    checker.mark_failed("hash-b", "failed", file_path="b.pdf")
+
+    success_records = checker.list_processed(collection="docs")
+
+    assert [record["file_hash"] for record in success_records] == ["hash-a"]
+    assert checker.remove_record("hash-a") == 1
+    assert checker.get_record("hash-a") is None
+
+
 def test_mark_failed_does_not_skip_and_success_can_overwrite(tmp_path) -> None:
     db_path = tmp_path / "ingestion_history.db"
     checker = SQLiteIntegrityChecker(db_path)

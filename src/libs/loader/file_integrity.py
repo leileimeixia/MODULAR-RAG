@@ -156,6 +156,51 @@ class SQLiteIntegrityChecker(FileIntegrityChecker):
         record["metadata"] = json.loads(record["metadata"] or "{}")
         return record
 
+    def list_processed(
+        self,
+        status: str | None = SUCCESS,
+        collection: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Return persisted integrity records, optionally filtered for management views."""
+        params: list[str] = []
+        clauses: list[str] = []
+        if status is not None:
+            if status not in {SUCCESS, FAILED}:
+                raise FileIntegrityError("status must be success, failed, or None")
+            clauses.append("status = ?")
+            params.append(status)
+
+        where_sql = "" if not clauses else "WHERE " + " AND ".join(clauses)
+        with self._connect() as connection:
+            rows = connection.execute(
+                f"""
+                SELECT file_hash, file_path, status, processed_at, error_msg, metadata
+                FROM file_integrity
+                {where_sql}
+                ORDER BY processed_at DESC, file_hash
+                """,
+                params,
+            ).fetchall()
+
+        records = []
+        for row in rows:
+            record = dict(row)
+            record["metadata"] = json.loads(record["metadata"] or "{}")
+            if collection is not None and record["metadata"].get("collection") != collection:
+                continue
+            records.append(record)
+        return records
+
+    def remove_record(self, file_hash: str) -> int:
+        """Delete one integrity record by file hash."""
+        _validate_hash(file_hash)
+        with self._connect() as connection:
+            cursor = connection.execute(
+                "DELETE FROM file_integrity WHERE file_hash = ?",
+                (file_hash,),
+            )
+        return int(cursor.rowcount)
+
     def _initialize(self) -> None:
         with self._connect() as connection:
             connection.execute("PRAGMA journal_mode=WAL")

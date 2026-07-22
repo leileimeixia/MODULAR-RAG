@@ -118,6 +118,36 @@ class BM25Indexer:
             for chunk_id, score in ranked[:top_k]
         ]
 
+    def remove_document(
+        self,
+        source_path: str | None = None,
+        collection: str | None = None,
+        file_hash: str | None = None,
+        doc_id: str | None = None,
+    ) -> int:
+        """Remove indexed records belonging to one document and persist changes."""
+        if not any([source_path, collection, file_hash, doc_id]):
+            raise BM25IndexerError("remove_document requires at least one filter")
+
+        matched_ids = [
+            chunk_id
+            for chunk_id, payload in self.records.items()
+            if _matches_document_filter(
+                chunk_id,
+                dict(payload.get("metadata", {})),
+                source_path=source_path,
+                collection=collection,
+                file_hash=file_hash,
+                doc_id=doc_id,
+            )
+        ]
+        for chunk_id in matched_ids:
+            self.records.pop(chunk_id, None)
+        if matched_ids:
+            self._rebuild_index()
+            self.save()
+        return len(matched_ids)
+
     def _rebuild_index(self) -> None:
         self.doc_count = len(self.records)
         doc_lengths = {
@@ -186,6 +216,32 @@ def _record_payload(record: ChunkRecord) -> dict[str, Any]:
         "metadata": dict(record.metadata),
         "sparse_vector": {term: float(tf) for term, tf in (record.sparse_vector or {}).items()},
     }
+
+
+def _matches_document_filter(
+    chunk_id: str,
+    metadata: dict[str, Any],
+    source_path: str | None = None,
+    collection: str | None = None,
+    file_hash: str | None = None,
+    doc_id: str | None = None,
+) -> bool:
+    if source_path is not None and metadata.get("source_path") != source_path:
+        return False
+    if collection is not None and metadata.get("collection") not in {None, collection}:
+        return False
+    if file_hash is not None and metadata.get("file_hash") != file_hash:
+        return False
+    if doc_id is not None:
+        return (
+            chunk_id == doc_id
+            or chunk_id.startswith(f"{doc_id}_")
+            or chunk_id.startswith(f"{doc_id}-")
+            or metadata.get("document_id") == doc_id
+            or metadata.get("doc_id") == doc_id
+            or metadata.get("file_hash") == doc_id
+        )
+    return True
 
 
 def _idf(document_count: int, document_frequency: int) -> float:
