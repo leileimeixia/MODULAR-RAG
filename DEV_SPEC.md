@@ -2036,7 +2036,7 @@ dashboard:
 | G1 | Dashboard 基础架构与系统总览页 | [x] | 2026-07-20 | Streamlit Dashboard 入口、系统总览页、配置服务与启动脚本完成，展示组件配置和 Chroma 数据统计 |
 | G2 | DocumentManager 实现 | [x] | 2026-07-21 | DocumentManager 跨 Chroma/BM25/ImageStorage/FileIntegrity 实现 list/detail/delete/stats，补齐删除与历史查询接口 |
 | G3 | 数据浏览器页面 | [x] | 2026-07-22 | DataService 与 Dashboard 数据浏览页完成，支持 collection 筛选、文档搜索、文档列表、chunk/metadata/image 详情展示 |
-| G4 | Ingestion 管理页面 | [ ] | | |
+| G4 | Ingestion 管理页面 | [x] | 2026-07-22 | IngestionService 与 Dashboard 管理页完成，支持文件上传保存、触发 pipeline、实时进度显示、文档列表和删除入口 |
 | G5 | Ingestion 追踪页面 | [ ] | | |
 | G6 | Query 追踪页面 | [ ] | | |
 
@@ -2072,10 +2072,10 @@ dashboard:
 | 阶段 D | 7 | 7 | 100% |
 | 阶段 E | 6 | 6 | 100% |
 | 阶段 F | 5 | 5 | 100% |
-| 阶段 G | 6 | 3 | 50% |
+| 阶段 G | 6 | 4 | 67% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **55** | **81%** |
+| **总计** | **68** | **56** | **82%** |
 
 
 ---
