@@ -44,6 +44,44 @@ def test_trace_service_returns_ingestion_trace_detail(tmp_path) -> None:
     assert detail["stages"][0]["details"]["source_path"] == "docs/sample.pdf"
 
 
+def test_trace_service_returns_query_trace_detail(tmp_path) -> None:
+    trace_file = tmp_path / "traces.jsonl"
+    _write_jsonl(trace_file, [_query_trace("query-1")])
+
+    traces = TraceService(trace_file=trace_file).list_query_traces()
+    detail = TraceService(trace_file=trace_file).get_query_trace("query-1")
+
+    assert traces[0]["trace_id"] == "query-1"
+    assert detail["retrieval_comparison"] == [
+        {
+            "route": "Dense",
+            "stage": "dense_retrieval",
+            "method": "DenseRetriever",
+            "elapsed_ms": 10.0,
+            "result_count": 3,
+            "failed": False,
+        },
+        {
+            "route": "Sparse",
+            "stage": "sparse_retrieval",
+            "method": "SparseRetriever",
+            "elapsed_ms": 8.0,
+            "result_count": 2,
+            "failed": False,
+        },
+        {
+            "route": "Fusion",
+            "stage": "fusion",
+            "method": "RRFusion",
+            "elapsed_ms": 1.0,
+            "result_count": 4,
+            "failed": False,
+        },
+    ]
+    assert detail["rerank_summary"]["backend"] == "NoneReranker"
+    assert detail["rerank_summary"]["candidate_count"] == 4
+
+
 def test_trace_service_rejects_invalid_jsonl(tmp_path) -> None:
     trace_file = tmp_path / "traces.jsonl"
     trace_file.write_text("{not-json}\n", encoding="utf-8")
@@ -85,6 +123,52 @@ def _trace(trace_id: str, trace_type: str, started_at: str, terminal_stage: str,
                 "details": {
                     "document_id": "doc-1",
                     "failed": failed,
+                },
+            },
+        ],
+    }
+
+
+def _query_trace(trace_id: str):
+    return {
+        "trace_id": trace_id,
+        "trace_type": "query",
+        "started_at": "2026-07-23T00:00:00Z",
+        "finished_at": "2026-07-23T00:00:01Z",
+        "total_elapsed_ms": 25.0,
+        "stages": [
+            {
+                "name": "dense_retrieval",
+                "method": "DenseRetriever",
+                "elapsed_ms": 10.0,
+                "recorded_at": "2026-07-23T00:00:00Z",
+                "details": {"result_count": 3, "failed": False},
+            },
+            {
+                "name": "sparse_retrieval",
+                "method": "SparseRetriever",
+                "elapsed_ms": 8.0,
+                "recorded_at": "2026-07-23T00:00:00Z",
+                "details": {"result_count": 2, "failed": False},
+            },
+            {
+                "name": "fusion",
+                "method": "RRFusion",
+                "elapsed_ms": 1.0,
+                "recorded_at": "2026-07-23T00:00:00Z",
+                "details": {"result_count": 4},
+            },
+            {
+                "name": "rerank",
+                "method": "CoreReranker",
+                "elapsed_ms": 2.0,
+                "recorded_at": "2026-07-23T00:00:00Z",
+                "details": {
+                    "backend": "NoneReranker",
+                    "candidate_count": 4,
+                    "result_count": 4,
+                    "top_k": 5,
+                    "fallback": False,
                 },
             },
         ],

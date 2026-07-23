@@ -2038,7 +2038,7 @@ dashboard:
 | G3 | 数据浏览器页面 | [x] | 2026-07-22 | DataService 与 Dashboard 数据浏览页完成，支持 collection 筛选、文档搜索、文档列表、chunk/metadata/image 详情展示 |
 | G4 | Ingestion 管理页面 | [x] | 2026-07-22 | IngestionService 与 Dashboard 管理页完成，支持文件上传保存、触发 pipeline、实时进度显示、文档列表和删除入口 |
 | G5 | Ingestion 追踪页面 | [x] | 2026-07-22 | TraceService 与 Dashboard Ingestion 追踪页完成，支持 JSONL trace 解析、历史列表、阶段耗时和详情展示 |
-| G6 | Query 追踪页面 | [ ] | | |
+| G6 | Query 追踪页面 | [x] | 2026-07-23 | Dashboard Query 追踪页完成，支持 query trace 历史、Dense/Sparse/Fusion 对比、Rerank 摘要和阶段详情展示 |
 
 #### 阶段 H：评估体系
 
@@ -2072,10 +2072,10 @@ dashboard:
 | 阶段 D | 7 | 7 | 100% |
 | 阶段 E | 6 | 6 | 100% |
 | 阶段 F | 5 | 5 | 100% |
-| 阶段 G | 6 | 5 | 83% |
+| 阶段 G | 6 | 6 | 100% |
 | 阶段 H | 5 | 0 | 0% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **57** | **84%** |
+| **总计** | **68** | **58** | **85%** |
 
 
 ---

@@ -51,6 +51,21 @@ class TraceService:
             raise TraceServiceError(f"trace is not an ingestion trace: {trace_id}")
         return detail
 
+    def list_query_traces(self) -> list[dict[str, Any]]:
+        """Return query trace summaries newest-first."""
+        return self.list_traces(trace_type="query")
+
+    def get_query_trace(self, trace_id: str) -> dict[str, Any]:
+        """Return one query trace detail with retrieval and rerank summaries."""
+        detail = self.get_trace(trace_id)
+        if detail.get("trace_type") != "query":
+            raise TraceServiceError(f"trace is not a query trace: {trace_id}")
+        return {
+            **detail,
+            "retrieval_comparison": _retrieval_comparison(detail["stages"]),
+            "rerank_summary": _rerank_summary(detail["stages"]),
+        }
+
     def _read_traces(self) -> list[dict[str, Any]]:
         if not self.trace_file.is_file():
             return []
@@ -93,6 +108,7 @@ def _trace_summary(trace: dict[str, Any]) -> dict[str, Any]:
         "status": _trace_status(stages),
         "source_path": _first_stage_detail(stages, "source_path"),
         "document_id": _first_stage_detail(stages, "document_id"),
+        "query": _first_stage_detail(stages, "query"),
     }
 
 
@@ -137,6 +153,8 @@ def _trace_status(stages: list[dict[str, Any]]) -> str:
         return "skipped"
     if any(stage["name"] == "ingestion_complete" for stage in stages):
         return "completed"
+    if stages:
+        return "completed"
     return "unknown"
 
 
@@ -150,3 +168,52 @@ def _first_stage_detail(stages: list[dict[str, Any]], key: str) -> str:
 
 def _trace_sort_key(trace: dict[str, Any]) -> str:
     return str(trace.get("started_at") or trace.get("finished_at") or "")
+
+
+def _retrieval_comparison(stages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    comparison: list[dict[str, Any]] = []
+    for stage_name, label in [
+        ("dense_retrieval", "Dense"),
+        ("sparse_retrieval", "Sparse"),
+        ("fusion", "Fusion"),
+        ("hybrid_search", "Hybrid Final"),
+    ]:
+        stage = _find_stage(stages, stage_name)
+        if stage is None:
+            continue
+        details = stage["details"]
+        comparison.append(
+            {
+                "route": label,
+                "stage": stage_name,
+                "method": stage["method"],
+                "elapsed_ms": stage["elapsed_ms"],
+                "result_count": int(details.get("result_count", details.get("fusion_count", 0)) or 0),
+                "failed": bool(details.get("failed", details.get("dense_failed", False) or details.get("sparse_failed", False))),
+            }
+        )
+    return comparison
+
+
+def _rerank_summary(stages: list[dict[str, Any]]) -> dict[str, Any]:
+    stage = _find_stage(stages, "rerank")
+    if stage is None:
+        return {}
+    details = stage["details"]
+    return {
+        "method": stage["method"],
+        "elapsed_ms": stage["elapsed_ms"],
+        "backend": str(details.get("backend", "")),
+        "candidate_count": int(details.get("candidate_count", 0) or 0),
+        "result_count": int(details.get("result_count", 0) or 0),
+        "top_k": int(details.get("top_k", 0) or 0),
+        "fallback": bool(details.get("fallback", False)),
+        "error": str(details.get("error", "")),
+    }
+
+
+def _find_stage(stages: list[dict[str, Any]], stage_name: str) -> dict[str, Any] | None:
+    for stage in stages:
+        if stage["name"] == stage_name:
+            return stage
+    return None

@@ -85,6 +85,23 @@ def test_ingestion_traces_page_renders_trace_detail() -> None:
     assert "1. load (12.5 ms)" in fake_st.expanders
 
 
+def test_query_traces_page_renders_retrieval_and_rerank_detail() -> None:
+    fake_st = _FakeStreamlit()
+
+    query_traces.render(fake_st, trace_service=_FakeQueryTraceService())
+
+    assert "Query Traces" in fake_st.titles
+    assert fake_st.metrics == [
+        ("Queries", 1),
+        ("Completed", 1),
+        ("Failed", 0),
+    ]
+    assert fake_st.dataframes[0][0]["trace_id"] == "query-1"
+    assert fake_st.dataframes[1][0]["route"] == "Dense"
+    assert fake_st.bar_charts == [{"Dense": 3, "Sparse": 2}]
+    assert any("NoneReranker" in message for message in fake_st.messages)
+
+
 class _FakeStreamlit:
     def __init__(self, uploaded_file=None, button_values=None) -> None:
         self.titles: list[str] = []
@@ -335,5 +352,72 @@ class _FakeTraceService:
                     "failed": False,
                     "details": {"document_id": "doc-1"},
                 },
+            ],
+        }
+
+
+class _FakeQueryTraceService:
+    def list_query_traces(self):
+        return [
+            {
+                "trace_id": "query-1",
+                "trace_type": "query",
+                "started_at": "2026-07-23T00:00:00Z",
+                "finished_at": "2026-07-23T00:00:01Z",
+                "total_elapsed_ms": 20.0,
+                "stage_count": 4,
+                "status": "completed",
+                "source_path": "",
+                "document_id": "",
+                "query": "alpha",
+            }
+        ]
+
+    def get_query_trace(self, trace_id):
+        return {
+            "trace_id": trace_id,
+            "trace_type": "query",
+            "started_at": "2026-07-23T00:00:00Z",
+            "finished_at": "2026-07-23T00:00:01Z",
+            "total_elapsed_ms": 20.0,
+            "stage_count": 4,
+            "status": "completed",
+            "retrieval_comparison": [
+                {
+                    "route": "Dense",
+                    "stage": "dense_retrieval",
+                    "method": "DenseRetriever",
+                    "elapsed_ms": 10.0,
+                    "result_count": 3,
+                    "failed": False,
+                },
+                {
+                    "route": "Sparse",
+                    "stage": "sparse_retrieval",
+                    "method": "SparseRetriever",
+                    "elapsed_ms": 8.0,
+                    "result_count": 2,
+                    "failed": False,
+                },
+            ],
+            "rerank_summary": {
+                "method": "CoreReranker",
+                "elapsed_ms": 2.0,
+                "backend": "NoneReranker",
+                "candidate_count": 5,
+                "result_count": 5,
+                "top_k": 5,
+                "fallback": False,
+                "error": "",
+            },
+            "stages": [
+                {
+                    "index": 1,
+                    "name": "dense_retrieval",
+                    "method": "DenseRetriever",
+                    "elapsed_ms": 10.0,
+                    "failed": False,
+                    "details": {"result_count": 3},
+                }
             ],
         }
