@@ -134,7 +134,7 @@
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| H1 | RagasEvaluator 实现 | [ ] | | |
+| H1 | RagasEvaluator 实现 | [x] | 2026-07-23 | RagasEvaluator 可选依赖封装完成，支持 faithfulness/answer_relevancy/context_precision mock 评估与 factory 注册 |
 | H2 | CompositeEvaluator 实现 | [ ] | | |
 | H3 | EvalRunner + Golden Test Set | [ ] | | |
 | H4 | 评估面板页面 | [ ] | | |
@@ -163,9 +163,9 @@
 | 阶段 E | 6 | 6 | 100% |
 | 阶段 F | 5 | 5 | 100% |
 | 阶段 G | 6 | 6 | 100% |
-| 阶段 H | 5 | 0 | 0% |
+| 阶段 H | 5 | 1 | 20% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **58** | **85%** |
+| **总计** | **68** | **59** | **87%** |
 
 
 ---

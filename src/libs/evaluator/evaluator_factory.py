@@ -18,11 +18,18 @@ class EvaluatorFactoryError(ValueError):
 EvaluatorCreator = Callable[[EvaluationSettings], BaseEvaluator]
 
 
+def _create_ragas_evaluator(settings: EvaluationSettings) -> BaseEvaluator:
+    from observability.evaluation.ragas_evaluator import RagasEvaluator
+
+    return RagasEvaluator(settings)
+
+
 class EvaluatorFactory:
     """Create evaluator implementations from project settings."""
 
     _registry: dict[str, EvaluatorCreator] = {
         "custom": CustomEvaluator,
+        "ragas": _create_ragas_evaluator,
     }
 
     @classmethod
