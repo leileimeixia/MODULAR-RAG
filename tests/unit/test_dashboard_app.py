@@ -69,6 +69,22 @@ def test_ingestion_manager_page_runs_upload_and_lists_documents() -> None:
     assert fake_st.dataframes[0][0]["source_name"] == "guide.pdf"
 
 
+def test_ingestion_traces_page_renders_trace_detail() -> None:
+    fake_st = _FakeStreamlit()
+
+    ingestion_traces.render(fake_st, trace_service=_FakeTraceService())
+
+    assert "Ingestion Traces" in fake_st.titles
+    assert fake_st.metrics == [
+        ("Traces", 1),
+        ("Completed", 1),
+        ("Failed", 0),
+    ]
+    assert fake_st.dataframes[0][0]["trace_id"] == "trace-1"
+    assert fake_st.bar_charts == [{"load": 12.5, "ingestion_complete": 1.0}]
+    assert "1. load (12.5 ms)" in fake_st.expanders
+
+
 class _FakeStreamlit:
     def __init__(self, uploaded_file=None, button_values=None) -> None:
         self.titles: list[str] = []
@@ -77,6 +93,7 @@ class _FakeStreamlit:
         self.metrics: list[tuple[str, int]] = []
         self.dataframes: list[list[dict]] = []
         self.expanders: list[str] = []
+        self.bar_charts: list[dict] = []
         self.uploaded_file = uploaded_file
         self.button_values = list(button_values or [])
         self.progress_values: list[float] = []
@@ -145,6 +162,9 @@ class _FakeStreamlit:
 
     def image(self, image_path, caption: str = "") -> None:
         self.messages.append(f"{caption}:{image_path}")
+
+    def bar_chart(self, data, **kwargs) -> None:
+        self.bar_charts.append(data)
 
     def expander(self, label: str, expanded: bool = False):
         self.expanders.append(label)
@@ -268,4 +288,52 @@ class _FakeIngestionService:
             "bm25_deleted": 2,
             "images_deleted": 1,
             "integrity_deleted": 1,
+        }
+
+
+class _FakeTraceService:
+    def list_ingestion_traces(self):
+        return [
+            {
+                "trace_id": "trace-1",
+                "trace_type": "ingestion",
+                "started_at": "2026-07-22T00:00:00Z",
+                "finished_at": "2026-07-22T00:00:01Z",
+                "total_elapsed_ms": 13.5,
+                "stage_count": 2,
+                "status": "completed",
+                "source_path": "docs/guide.pdf",
+                "document_id": "doc-1",
+            }
+        ]
+
+    def get_ingestion_trace(self, trace_id):
+        return {
+            "trace_id": trace_id,
+            "trace_type": "ingestion",
+            "started_at": "2026-07-22T00:00:00Z",
+            "finished_at": "2026-07-22T00:00:01Z",
+            "total_elapsed_ms": 13.5,
+            "stage_count": 2,
+            "status": "completed",
+            "source_path": "docs/guide.pdf",
+            "document_id": "doc-1",
+            "stages": [
+                {
+                    "index": 1,
+                    "name": "load",
+                    "method": "PdfLoader",
+                    "elapsed_ms": 12.5,
+                    "failed": False,
+                    "details": {"source_path": "docs/guide.pdf"},
+                },
+                {
+                    "index": 2,
+                    "name": "ingestion_complete",
+                    "method": "pipeline",
+                    "elapsed_ms": 1.0,
+                    "failed": False,
+                    "details": {"document_id": "doc-1"},
+                },
+            ],
         }
