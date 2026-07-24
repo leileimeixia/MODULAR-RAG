@@ -135,7 +135,7 @@
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
 | H1 | RagasEvaluator 实现 | [x] | 2026-07-23 | RagasEvaluator 可选依赖封装完成，支持 faithfulness/answer_relevancy/context_precision mock 评估与 factory 注册 |
-| H2 | CompositeEvaluator 实现 | [ ] | | |
+| H2 | CompositeEvaluator 实现 | [x] | 2026-07-23 | CompositeEvaluator 并行执行多个 evaluator 并合并 metrics，EvaluatorFactory 支持 evaluation.backends 配置驱动组合 |
 | H3 | EvalRunner + Golden Test Set | [ ] | | |
 | H4 | 评估面板页面 | [ ] | | |
 | H5 | Recall 回归测试（E2E） | [ ] | | |
@@ -163,9 +163,9 @@
 | 阶段 E | 6 | 6 | 100% |
 | 阶段 F | 5 | 5 | 100% |
 | 阶段 G | 6 | 6 | 100% |
-| 阶段 H | 5 | 1 | 20% |
+| 阶段 H | 5 | 2 | 40% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **59** | **87%** |
+| **总计** | **68** | **60** | **88%** |
 
 
 ---

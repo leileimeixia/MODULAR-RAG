@@ -52,6 +52,9 @@ def test_load_settings_reads_config_file(tmp_path, monkeypatch) -> None:
         evaluation:
           enabled: false
           provider: custom
+          backends:
+            - ragas
+            - custom
         observability:
           log_level: INFO
           trace_enabled: true
@@ -65,6 +68,7 @@ def test_load_settings_reads_config_file(tmp_path, monkeypatch) -> None:
     assert settings.llm.api_key == "test-key"
     assert settings.embedding.dimensions == 1536
     assert settings.vector_store.collection_name == "knowledge_hub"
+    assert settings.evaluation.backends == ["ragas", "custom"]
 
 
 def test_load_settings_reports_missing_required_field(tmp_path) -> None:
