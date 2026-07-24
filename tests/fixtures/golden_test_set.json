@@ -1,0 +1,15 @@
+{
+  "test_cases": [
+    {
+      "query": "How do I configure Azure OpenAI?",
+      "expected_chunk_ids": [
+        "chunk_azure_openai_001"
+      ],
+      "expected_sources": [
+        "config_guide.pdf"
+      ],
+      "generated_answer": "Configure the Azure OpenAI endpoint, deployment, and API key.",
+      "top_k": 3
+    }
+  ]
+}
