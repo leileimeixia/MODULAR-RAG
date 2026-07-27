@@ -63,6 +63,18 @@ class FakeVectorStore(BaseVectorStore):
             if record_id in self.records
         ]
 
+    def delete_by_metadata(self, filters: dict) -> int:
+        if not isinstance(filters, dict) or not filters:
+            raise ValueError("delete_by_metadata filters must be a non-empty dictionary")
+        matched_ids = [
+            record.id
+            for record in self.records.values()
+            if all(record.metadata.get(key) == value for key, value in filters.items())
+        ]
+        for record_id in matched_ids:
+            self.records.pop(record_id, None)
+        return len(matched_ids)
+
 
 @pytest.fixture(autouse=True)
 def clean_registry():
@@ -186,12 +198,70 @@ def test_vector_store_contract_get_by_ids_preserves_order_and_skips_missing() ->
     assert [record.id for record in records] == ["b", "a"]
 
 
+def test_vector_store_contract_delete_by_metadata_requires_non_empty_filters() -> None:
+    store = FakeVectorStore(
+        VectorStoreSettings(
+            provider="fake",
+            persist_directory="./tmp",
+            collection_name="test",
+        )
+    )
+
+    with pytest.raises(ValueError, match="non-empty dictionary"):
+        store.delete_by_metadata({})
+
+
+def test_vector_store_contract_delete_by_metadata_matches_all_filters() -> None:
+    store = FakeVectorStore(
+        VectorStoreSettings(
+            provider="fake",
+            persist_directory="./tmp",
+            collection_name="test",
+        )
+    )
+    store.upsert(
+        [
+            VectorRecord(
+                id="a",
+                text="alpha",
+                vector=[1.0],
+                metadata={"source_path": "guide.pdf", "collection": "docs"},
+            ),
+            VectorRecord(
+                id="b",
+                text="beta",
+                vector=[1.0],
+                metadata={"source_path": "guide.pdf", "collection": "other"},
+            ),
+            VectorRecord(
+                id="c",
+                text="gamma",
+                vector=[1.0],
+                metadata={"source_path": "manual.pdf", "collection": "docs"},
+            ),
+        ]
+    )
+
+    deleted = store.delete_by_metadata({"source_path": "guide.pdf", "collection": "docs"})
+
+    assert deleted == 1
+    assert sorted(store.records) == ["b", "c"]
+
+
 def test_factory_rejects_unknown_provider() -> None:
     with pytest.raises(
         VectorStoreFactoryError,
         match="Unsupported vector store provider 'missing'",
     ):
         VectorStoreFactory.create(_settings(provider="missing"))
+
+
+def test_factory_rejects_empty_provider() -> None:
+    with pytest.raises(
+        VectorStoreFactoryError,
+        match="provider must be a non-empty string",
+    ):
+        VectorStoreFactory.create(_settings(provider=" "))
 
 
 def test_base_vector_store_requires_methods() -> None:

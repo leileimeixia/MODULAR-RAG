@@ -46,6 +46,16 @@ class FakeVectorStore(BaseVectorStore):
             if record_id in self.records
         ]
 
+    def delete_by_metadata(self, filters: dict) -> int:
+        matched_ids = [
+            record.id
+            for record in self.records.values()
+            if all(record.metadata.get(key) == value for key, value in filters.items())
+        ]
+        for record_id in matched_ids:
+            self.records.pop(record_id, None)
+        return len(matched_ids)
+
 
 def _store() -> FakeVectorStore:
     return FakeVectorStore(

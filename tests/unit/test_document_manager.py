@@ -82,6 +82,16 @@ def test_document_manager_raises_for_missing_document(tmp_path) -> None:
         manager.delete_document("missing.pdf")
 
 
+def test_document_manager_rejects_blank_document_inputs(tmp_path) -> None:
+    manager, _stores = _manager(tmp_path)
+
+    with pytest.raises(DocumentManagerError, match="doc_id must be a non-empty string"):
+        manager.get_document_detail(" ")
+
+    with pytest.raises(DocumentManagerError, match="source_path must be a non-empty string"):
+        manager.delete_document(" ")
+
+
 def _manager(tmp_path):
     chroma = ChromaStore(
         VectorStoreSettings(

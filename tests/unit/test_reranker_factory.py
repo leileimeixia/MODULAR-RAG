@@ -143,6 +143,31 @@ def test_factory_returns_none_reranker_when_disabled() -> None:
     ) == [RerankResult(id="a", text="first", score=0.3)]
 
 
+def test_none_reranker_preserves_order_metadata_and_default_top_k() -> None:
+    reranker = NoneReranker(RerankSettings(enabled=False, provider="none", top_k=2))
+
+    results = reranker.rerank(
+        "query",
+        [
+            RerankCandidate(id="a", text="first", score=0.3, metadata={"page": 1}),
+            RerankCandidate(id="b", text="second", score=0.2, metadata={"page": 2}),
+            RerankCandidate(id="c", text="third", score=0.1, metadata={"page": 3}),
+        ],
+    )
+
+    assert results == [
+        RerankResult(id="a", text="first", score=0.3, metadata={"page": 1}),
+        RerankResult(id="b", text="second", score=0.2, metadata={"page": 2}),
+    ]
+
+
+def test_none_reranker_rejects_negative_top_k() -> None:
+    reranker = NoneReranker(RerankSettings(enabled=False, provider="none"))
+
+    with pytest.raises(ValueError, match="top_k"):
+        reranker.rerank("query", [], top_k=-1)
+
+
 def test_factory_normalizes_provider_names() -> None:
     RerankerFactory.register("fake-provider", FakeReranker)
 
@@ -160,6 +185,14 @@ def test_factory_rejects_unknown_provider() -> None:
         match="Unsupported reranker provider 'missing'",
     ):
         RerankerFactory.create(_settings(provider="missing"))
+
+
+def test_factory_rejects_empty_provider_when_enabled() -> None:
+    with pytest.raises(
+        RerankerFactoryError,
+        match="provider must be a non-empty string",
+    ):
+        RerankerFactory.create(_settings(provider=" "))
 
 
 def test_base_reranker_requires_rerank_implementation() -> None:

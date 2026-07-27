@@ -59,3 +59,7 @@ class BaseVectorStore(ABC):
         trace: Any | None = None,
     ) -> list[VectorRecord]:
         """Return stored records matching ids, preserving requested id order."""
+
+    @abstractmethod
+    def delete_by_metadata(self, filters: Metadata) -> int:
+        """Delete records matching metadata filters and return the deleted count."""

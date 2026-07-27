@@ -112,6 +112,41 @@ def test_custom_evaluator_handles_empty_inputs() -> None:
     assert result.details["first_hit_rank"] is None
 
 
+def test_custom_evaluator_handles_empty_golden_ids() -> None:
+    evaluator = CustomEvaluator()
+
+    result = evaluator.evaluate(query="rag", retrieved_ids=["chunk-a"], golden_ids=[])
+
+    assert result.metrics == {
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+    }
+    assert result.details == {
+        "query": "rag",
+        "retrieved_count": 1,
+        "golden_count": 0,
+        "first_hit_rank": None,
+    }
+
+
+def test_custom_evaluator_uses_unique_golden_ids_but_counts_retrieved_hits() -> None:
+    evaluator = CustomEvaluator()
+
+    result = evaluator.evaluate(
+        query="rag",
+        retrieved_ids=["chunk-a", "chunk-a", "chunk-b"],
+        golden_ids=["chunk-a", "chunk-a"],
+    )
+
+    assert result.metrics == {
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": pytest.approx(2 / 3),
+    }
+    assert result.details["golden_count"] == 1
+
+
 def test_factory_creates_default_custom_evaluator_from_full_settings() -> None:
     evaluator = EvaluatorFactory.create(_settings())
 
@@ -145,6 +180,14 @@ def test_factory_rejects_unknown_provider() -> None:
         match="Unsupported evaluator provider 'missing'",
     ):
         EvaluatorFactory.create(_settings(provider="missing"))
+
+
+def test_factory_rejects_empty_provider() -> None:
+    with pytest.raises(
+        EvaluatorFactoryError,
+        match="provider must be a non-empty string",
+    ):
+        EvaluatorFactory.create(_settings(provider=" "))
 
 
 def test_base_evaluator_requires_evaluate_implementation() -> None:

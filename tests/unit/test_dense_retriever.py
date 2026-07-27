@@ -56,6 +56,9 @@ class FakeVectorStore(BaseVectorStore):
     def get_by_ids(self, ids: list[str], trace=None) -> list[VectorRecord]:
         return []
 
+    def delete_by_metadata(self, filters: dict) -> int:
+        return 0
+
 
 def test_dense_retriever_embeds_query_and_calls_vector_store() -> None:
     embedding = FakeEmbedding(vectors=[[0.1, 0.2]])

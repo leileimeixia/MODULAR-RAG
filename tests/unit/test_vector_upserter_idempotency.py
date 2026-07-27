@@ -32,6 +32,16 @@ class FakeVectorStore(BaseVectorStore):
     def get_by_ids(self, ids: list[str], trace=None) -> list[VectorRecord]:
         return [self.records[record_id] for record_id in ids if record_id in self.records]
 
+    def delete_by_metadata(self, filters: dict) -> int:
+        matched_ids = [
+            record.id
+            for record in self.records.values()
+            if all(record.metadata.get(key) == value for key, value in filters.items())
+        ]
+        for record_id in matched_ids:
+            self.records.pop(record_id, None)
+        return len(matched_ids)
+
 
 def _record(index: int, text: str | None = None) -> ChunkRecord:
     text = text if text is not None else f"chunk {index}"
