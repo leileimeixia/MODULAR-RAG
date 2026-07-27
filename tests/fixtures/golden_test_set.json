@@ -10,6 +10,17 @@
       ],
       "generated_answer": "Configure the Azure OpenAI endpoint, deployment, and API key.",
       "top_k": 3
+    },
+    {
+      "query": "How can I inspect ingestion progress?",
+      "expected_chunk_ids": [
+        "chunk_dashboard_ingestion_001"
+      ],
+      "expected_sources": [
+        "dashboard_guide.md"
+      ],
+      "generated_answer": "Open the Ingestion Manager or ingestion traces page to inspect progress.",
+      "top_k": 3
     }
   ]
 }
