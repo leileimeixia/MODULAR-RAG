@@ -2055,7 +2055,7 @@ dashboard:
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
 | I1 | E2E：MCP Client 侧调用模拟 | [x] | 2026-07-27 | 新增 MCP stdio 子进程 E2E，模拟 initialize、tools/list、tools/call query_knowledge_hub 并验证 citations 返回 |
-| I2 | E2E：Dashboard 冒烟测试 | [ ] | | |
+| I2 | E2E：Dashboard 冒烟测试 | [x] | 2026-07-27 | 新增 Streamlit AppTest Dashboard 冒烟测试，覆盖 6 个页面；无 Streamlit 环境下明确 skip |
 | I3 | 完善 README（运行说明 + MCP + Dashboard） | [ ] | | |
 | I4 | 清理接口一致性（契约测试补齐） | [ ] | | |
 | I5 | 全链路 E2E 验收 | [ ] | | |
@@ -2074,8 +2074,8 @@ dashboard:
 | 阶段 F | 5 | 5 | 100% |
 | 阶段 G | 6 | 6 | 100% |
 | 阶段 H | 5 | 5 | 100% |
-| 阶段 I | 5 | 1 | 20% |
-| **总计** | **68** | **64** | **94%** |
+| 阶段 I | 5 | 2 | 40% |
+| **总计** | **68** | **65** | **96%** |
 
 
 ---
