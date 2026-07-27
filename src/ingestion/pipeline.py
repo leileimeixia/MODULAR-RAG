@@ -10,7 +10,7 @@ from typing import Any, Callable
 
 from core import Document
 from core.trace import TraceCollector, TraceContext
-from libs.loader import PdfLoader, SQLiteIntegrityChecker
+from libs.loader import DocumentLoader, SQLiteIntegrityChecker
 
 from .chunking import DocumentChunker
 from .embedding import BatchProcessor
@@ -59,7 +59,7 @@ class IngestionPipeline:
     ) -> None:
         self.settings = settings
         self.integrity_checker = integrity_checker or SQLiteIntegrityChecker()
-        self.loader = loader or PdfLoader()
+        self.loader = loader or DocumentLoader()
         self.chunker = chunker or _require_settings(settings, DocumentChunker)
         self.transforms = transforms or []
         self.batch_processor = batch_processor or BatchProcessor(settings=settings)

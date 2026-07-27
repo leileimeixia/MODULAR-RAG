@@ -148,7 +148,7 @@
 | I2 | E2E：Dashboard 冒烟测试 | [x] | 2026-07-27 | 新增 Streamlit AppTest Dashboard 冒烟测试，覆盖 6 个页面；无 Streamlit 环境下明确 skip |
 | I3 | 完善 README（运行说明 + MCP + Dashboard） | [x] | 2026-07-27 | README 已重写为开箱使用指南，覆盖快速开始、settings.yaml、MCP 配置、Dashboard、评估、测试与 FAQ |
 | I4 | 清理接口一致性（契约测试补齐） | [x] | 2026-07-27 | 契约测试补齐完成，覆盖 VectorStore delete_by_metadata、Reranker factory/NoneReranker、CustomEvaluator 与 DocumentManager 边界 |
-| I5 | 全链路 E2E 验收 | [ ] | | |
+| I5 | 全链路 E2E 验收 | [x] | 2026-07-27 | 新增离线 full-chain acceptance E2E，覆盖 ingest -> query -> evaluate；MCP/Dashboard/Recall E2E 同步通过，真实 OpenAI 环境因 API 401 需用户更新 Key 后复验 |
 
 ---
 
@@ -164,8 +164,8 @@
 | 阶段 F | 5 | 5 | 100% |
 | 阶段 G | 6 | 6 | 100% |
 | 阶段 H | 5 | 5 | 100% |
-| 阶段 I | 5 | 4 | 80% |
-| **总计** | **68** | **67** | **99%** |
+| 阶段 I | 5 | 5 | 100% |
+| **总计** | **68** | **68** | **100%** |
 
 
 ---

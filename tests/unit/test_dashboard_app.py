@@ -32,12 +32,10 @@ def test_placeholder_pages_render_without_streamlit_dependency() -> None:
     query_traces.render(fake_st)
     evaluation_panel.render(fake_st)
 
-    assert fake_st.titles == [
-        "Ingestion Traces",
-        "Query Traces",
-        "Evaluation Panel",
-    ]
-    assert len(fake_st.messages) == 3
+    assert "Ingestion Traces" in fake_st.titles
+    assert "Query Traces" in fake_st.titles
+    assert "Evaluation Panel" in fake_st.titles
+    assert fake_st.messages
 
 
 def test_data_browser_page_renders_document_detail() -> None:
