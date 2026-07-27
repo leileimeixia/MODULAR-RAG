@@ -102,8 +102,28 @@ def test_query_traces_page_renders_retrieval_and_rerank_detail() -> None:
     assert any("NoneReranker" in message for message in fake_st.messages)
 
 
+def test_evaluation_panel_runs_and_renders_eval_report() -> None:
+    fake_st = _FakeStreamlit(button_values=[True], number_values=[3])
+
+    evaluation_panel.render(fake_st, evaluation_service=_FakeEvaluationService())
+
+    assert "Evaluation Panel" in fake_st.titles
+    assert fake_st.metrics == [
+        ("hit_rate", "1.0000"),
+        ("mrr", "0.5000"),
+    ]
+    assert fake_st.dataframes[0][0] == {
+        "query": "alpha?",
+        "retrieved_count": 2,
+        "expected_count": 1,
+        "hit_rate": "1.0000",
+        "mrr": "0.5000",
+    }
+    assert "1. alpha?" in fake_st.expanders
+
+
 class _FakeStreamlit:
-    def __init__(self, uploaded_file=None, button_values=None) -> None:
+    def __init__(self, uploaded_file=None, button_values=None, number_values=None) -> None:
         self.titles: list[str] = []
         self.messages: list[str] = []
         self.captions: list[str] = []
@@ -113,6 +133,7 @@ class _FakeStreamlit:
         self.bar_charts: list[dict] = []
         self.uploaded_file = uploaded_file
         self.button_values = list(button_values or [])
+        self.number_values = list(number_values or [])
         self.progress_values: list[float] = []
 
     def title(self, value: str) -> None:
@@ -131,6 +152,11 @@ class _FakeStreamlit:
         return list(options)[0]
 
     def text_input(self, label: str, value: str = "") -> str:
+        return value
+
+    def number_input(self, label: str, min_value=0, value=0, step=1):
+        if self.number_values:
+            return self.number_values.pop(0)
         return value
 
     def checkbox(self, label: str, value: bool = False) -> bool:
@@ -420,4 +446,33 @@ class _FakeQueryTraceService:
                     "details": {"result_count": 3},
                 }
             ],
+        }
+
+
+class _FakeEvaluationService:
+    def run_evaluation(self, test_set_path, top_k=None):
+        return {
+            "metrics": {
+                "hit_rate": 1.0,
+                "mrr": 0.5,
+            },
+            "case_results": [
+                {
+                    "query": "alpha?",
+                    "retrieved_ids": ["chunk-a", "chunk-b"],
+                    "expected_chunk_ids": ["chunk-a"],
+                    "metrics": {
+                        "hit_rate": 1.0,
+                        "mrr": 0.5,
+                    },
+                    "details": {
+                        "top_k": top_k,
+                        "test_set_path": test_set_path,
+                    },
+                }
+            ],
+            "details": {
+                "test_set_path": str(test_set_path),
+                "case_count": 1,
+            },
         }

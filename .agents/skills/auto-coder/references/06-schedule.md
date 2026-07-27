@@ -137,7 +137,7 @@
 | H1 | RagasEvaluator 实现 | [x] | 2026-07-23 | RagasEvaluator 可选依赖封装完成，支持 faithfulness/answer_relevancy/context_precision mock 评估与 factory 注册 |
 | H2 | CompositeEvaluator 实现 | [x] | 2026-07-23 | CompositeEvaluator 并行执行多个 evaluator 并合并 metrics，EvaluatorFactory 支持 evaluation.backends 配置驱动组合 |
 | H3 | EvalRunner + Golden Test Set | [x] | 2026-07-24 | EvalRunner 可读取 golden_test_set.json，批量执行 HybridSearch 与 evaluator，输出聚合 EvalReport，并新增 scripts/evaluate.py |
-| H4 | 评估面板页面 | [ ] | | |
+| H4 | 评估面板页面 | [x] | 2026-07-24 | Dashboard Evaluation Panel 完成，支持选择 golden test set、运行 EvalRunner、展示汇总 metrics 与 case 明细 |
 | H5 | Recall 回归测试（E2E） | [ ] | | |
 
 #### 阶段 I：端到端验收与文档收口
@@ -163,9 +163,9 @@
 | 阶段 E | 6 | 6 | 100% |
 | 阶段 F | 5 | 5 | 100% |
 | 阶段 G | 6 | 6 | 100% |
-| 阶段 H | 5 | 3 | 60% |
+| 阶段 H | 5 | 4 | 80% |
 | 阶段 I | 5 | 0 | 0% |
-| **总计** | **68** | **61** | **90%** |
+| **总计** | **68** | **62** | **91%** |
 
 
 ---
