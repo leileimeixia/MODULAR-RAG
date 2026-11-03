@@ -23,6 +23,15 @@ def test_dashboard_registers_six_pages() -> None:
         "Query Traces",
         "Evaluation Panel",
     ]
+    assert [page.url_path for page in pages] == [
+        "system-overview",
+        "data-browser",
+        "ingestion-manager",
+        "ingestion-traces",
+        "query-traces",
+        "evaluation-panel",
+    ]
+    assert len({page.url_path for page in pages}) == len(pages)
 
 
 def test_placeholder_pages_render_without_streamlit_dependency() -> None:

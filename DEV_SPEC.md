@@ -1980,85 +1980,85 @@ dashboard:
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| C1 | 定义核心数据类型/契约（Document/Chunk/ChunkRecord） | [x] | 2026-06-22 | Document/Chunk/ChunkRecord/ImageRef 可序列化契约 + 单元测试 |
-| C2 | 文件完整性检查（SHA256） | [x] | 2026-06-22 | SQLiteIntegrityChecker + SHA256 计算 + WAL 并发写入单元测试 |
-| C3 | Loader 抽象基类与 PDF Loader | [x] | 2026-06-23 | BaseLoader + PdfLoader 文本 PDF 解析契约与安全降级 |
-| C4 | Splitter 集成（调用 Libs） | [x] | 2026-06-23 | DocumentChunker 适配 Document->Chunk，稳定 ID/metadata/source_ref/图片引用分发 |
-| C5 | Transform 基类 + ChunkRefiner | [x] | 2026-07-11 | BaseTransform + ChunkRefiner 规则去噪/Mock LLM/失败降级 + TraceContext 占位 |
-| C6 | MetadataEnricher | [x] | 2026-07-11 | MetadataEnricher 规则 title/summary/tags + Mock LLM JSON 增强与降级 |
-| C7 | ImageCaptioner | [x] | 2026-07-11 | ImageCaptioner Mock Vision LLM caption 写回 + 禁用/异常降级 |
-| C8 | DenseEncoder | [x] | 2026-07-12 | DenseEncoder 批量调用 BaseEmbedding 生成 ChunkRecord dense_vector + 形状校验 |
-| C9 | SparseEncoder | [x] | 2026-07-12 | SparseEncoder 输出 BM25 term frequency ChunkRecord sparse_vector + 空文本空向量行为 |
-| C10 | BatchProcessor | [x] | 2026-07-12 | BatchProcessor 按 batch_size 编排 dense/sparse 编码并合并 ChunkRecord |
-| C11 | BM25Indexer（倒排索引+IDF计算） | [x] | 2026-07-12 | BM25Indexer 构建/加载 pickle 倒排索引，支持 IDF、查询、重建与增量更新 |
-| C12 | VectorUpserter（幂等upsert） | [x] | 2026-07-12 | VectorUpserter 将 dense ChunkRecord 转 VectorRecord 并幂等调用 BaseVectorStore.upsert |
-| C13 | ImageStorage（图片存储+SQLite索引） | [x] | 2026-07-12 | ImageStorage 保存图片文件并用 SQLite/WAL 维护 image_id→path 索引 |
-| C14 | Pipeline 编排（MVP 串起来） | [x] | 2026-07-12 | IngestionPipeline 串联 integrity/load/split/transform/encode/store 并提供清晰失败阶段 |
-| C15 | 脚本入口 ingest.py | [x] | 2026-07-13 | scripts/ingest.py 支持 --path/--collection/--force 并调用 IngestionPipeline |
+| C1 | 定义核心数据类型/契约（Document/Chunk/ChunkRecord） | [ ] | | |
+| C2 | 文件完整性检查（SHA256） | [ ] | | |
+| C3 | Loader 抽象基类与 PDF Loader | [ ] | | |
+| C4 | Splitter 集成（调用 Libs） | [ ] | | |
+| C5 | Transform 基类 + ChunkRefiner | [ ] | | |
+| C6 | MetadataEnricher | [ ] | | |
+| C7 | ImageCaptioner | [ ] | | |
+| C8 | DenseEncoder | [ ] | | |
+| C9 | SparseEncoder | [ ] | | |
+| C10 | BatchProcessor | [ ] | | |
+| C11 | BM25Indexer（倒排索引+IDF计算） | [ ] | | |
+| C12 | VectorUpserter（幂等upsert） | [ ] | | |
+| C13 | ImageStorage（图片存储+SQLite索引） | [ ] | | |
+| C14 | Pipeline 编排（MVP 串起来） | [ ] | | |
+| C15 | 脚本入口 ingest.py | [ ] | | |
 
 #### 阶段 D：Retrieval MVP
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| D1 | QueryProcessor（关键词提取 + filters） | [x] | 2026-07-13 | QueryProcessor 规则提取 keywords，解析通用 inline filters 并支持外部 filters 合并 |
-| D2 | DenseRetriever（调用 VectorStore.query） | [x] | 2026-07-13 | DenseRetriever 调用 BaseEmbedding 生成 query vector 并映射 VectorStore.query 结果为 RetrievalResult |
-| D3 | SparseRetriever（BM25 查询） | [x] | 2026-07-13 | SparseRetriever 调用 BM25 查询并通过 VectorStore.get_by_ids 组装 RetrievalResult |
-| D4 | RRF Fusion | [x] | 2026-07-13 | RRFusion 按 Reciprocal Rank Fusion 融合 dense/sparse 排名并输出确定性 RetrievalResult |
-| D5 | HybridSearch 编排 | [x] | 2026-07-13 | HybridSearch 编排 QueryProcessor、Dense/Sparse Retriever、RRFusion，并支持 metadata 后置过滤与单路失败降级 |
-| D6 | Reranker（Core 层编排 + Fallback） | [x] | 2026-07-13 | CoreReranker 适配 RetrievalResult 与 libs.reranker 后端，并在后端失败时回退原融合排名 |
-| D7 | 脚本入口 query.py（查询可用） | [x] | 2026-07-13 | scripts/query.py 支持在线查询、metadata filters、verbose trace 与 --no-rerank 调试模式 |
+| D1 | QueryProcessor（关键词提取 + filters） | [ ] | | |
+| D2 | DenseRetriever（调用 VectorStore.query） | [ ] | | |
+| D3 | SparseRetriever（BM25 查询） | [ ] | | |
+| D4 | RRF Fusion | [ ] | | |
+| D5 | HybridSearch 编排 | [ ] | | |
+| D6 | Reranker（Core 层编排 + Fallback） | [ ] | | |
+| D7 | 脚本入口 query.py（查询可用） | [ ] | | |
 
 #### 阶段 E：MCP Server 层与 Tools
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| E1 | MCP Server 入口与 Stdio 约束 | [x] | 2026-07-14 | mcp_server/server.py 提供 JSON-RPC stdio 循环，initialize 响应走 stdout，运行日志走 stderr |
-| E2 | Protocol Handler 协议解析与能力协商 | [x] | 2026-07-14 | ProtocolHandler 封装 JSON-RPC initialize、tools/list、tools/call，并按规范返回错误响应 |
-| E3 | query_knowledge_hub Tool | [x] | 2026-07-15 | query_knowledge_hub 调用 HybridSearch + CoreReranker，并返回 Markdown content 与 structuredContent.citations |
-| E4 | list_collections Tool | [x] | 2026-07-15 | list_collections 返回 data/documents 下集合及文档数量、总字节数统计 |
-| E5 | get_document_summary Tool | [x] | 2026-07-15 | get_document_summary 从 BM25 持久化 records 聚合 title、summary、tags，并对缺失 doc_id 返回规范 tool error |
-| E6 | 多模态返回组装（Text + Image） | [x] | 2026-07-16 | MultimodalAssembler 将检索结果中的图片元数据编码为 MCP ImageContent，并由 ResponseBuilder 追加到 content |
+| E1 | MCP Server 入口与 Stdio 约束 | [ ] | | |
+| E2 | Protocol Handler 协议解析与能力协商 | [ ] | | |
+| E3 | query_knowledge_hub Tool | [ ] | | |
+| E4 | list_collections Tool | [ ] | | |
+| E5 | get_document_summary Tool | [ ] | | |
+| E6 | 多模态返回组装（Text + Image） | [ ] | | |
 
 #### 阶段 F：Trace 基础设施与打点
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| F1 | TraceContext 增强（finish + 耗时统计 + trace_type） | [x] | 2026-07-16 | TraceContext 支持 trace_type、finish、elapsed_ms、to_dict，并新增 TraceCollector 收集序列化 trace |
-| F2 | 结构化日志 logger（JSON Lines） | [x] | 2026-07-16 | observability.logger 支持 JSONFormatter、get_trace_logger、write_trace，并让 TraceCollector 可持久化 JSONL trace |
-| F3 | 在 Query 链路打点 | [x] | 2026-07-20 | query_knowledge_hub 创建 query TraceContext，HybridSearch/Reranker 记录 query_processing、dense、sparse、fusion、rerank 等阶段并返回 trace |
-| F4 | 在 Ingestion 链路打点 | [x] | 2026-07-20 | IngestionPipeline 创建 ingestion trace，记录 load、split、transform、embed、upsert 等阶段耗时，并通过 TraceCollector 收集 |
-| F5 | Pipeline 进度回调 (on_progress) | [x] | 2026-07-20 | IngestionPipeline.run 支持 on_progress(stage_name, current, total)，完整、跳过和无回调路径均保持兼容 |
+| F1 | TraceContext 增强（finish + 耗时统计 + trace_type） | [ ] | | |
+| F2 | 结构化日志 logger（JSON Lines） | [ ] | | |
+| F3 | 在 Query 链路打点 | [ ] | | |
+| F4 | 在 Ingestion 链路打点 | [ ] | | |
+| F5 | Pipeline 进度回调 (on_progress) | [ ] | | |
 
 #### 阶段 G：可视化管理平台 Dashboard
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| G1 | Dashboard 基础架构与系统总览页 | [x] | 2026-07-20 | Streamlit Dashboard 入口、系统总览页、配置服务与启动脚本完成，展示组件配置和 Chroma 数据统计 |
-| G2 | DocumentManager 实现 | [x] | 2026-07-21 | DocumentManager 跨 Chroma/BM25/ImageStorage/FileIntegrity 实现 list/detail/delete/stats，补齐删除与历史查询接口 |
-| G3 | 数据浏览器页面 | [x] | 2026-07-22 | DataService 与 Dashboard 数据浏览页完成，支持 collection 筛选、文档搜索、文档列表、chunk/metadata/image 详情展示 |
-| G4 | Ingestion 管理页面 | [x] | 2026-07-22 | IngestionService 与 Dashboard 管理页完成，支持文件上传保存、触发 pipeline、实时进度显示、文档列表和删除入口 |
-| G5 | Ingestion 追踪页面 | [x] | 2026-07-22 | TraceService 与 Dashboard Ingestion 追踪页完成，支持 JSONL trace 解析、历史列表、阶段耗时和详情展示 |
-| G6 | Query 追踪页面 | [x] | 2026-07-23 | Dashboard Query 追踪页完成，支持 query trace 历史、Dense/Sparse/Fusion 对比、Rerank 摘要和阶段详情展示 |
+| G1 | Dashboard 基础架构与系统总览页 | [ ] | | |
+| G2 | DocumentManager 实现 | [ ] | | |
+| G3 | 数据浏览器页面 | [ ] | | |
+| G4 | Ingestion 管理页面 | [ ] | | |
+| G5 | Ingestion 追踪页面 | [ ] | | |
+| G6 | Query 追踪页面 | [ ] | | |
 
 #### 阶段 H：评估体系
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| H1 | RagasEvaluator 实现 | [x] | 2026-07-23 | RagasEvaluator 可选依赖封装完成，支持 faithfulness/answer_relevancy/context_precision mock 评估与 factory 注册 |
-| H2 | CompositeEvaluator 实现 | [x] | 2026-07-23 | CompositeEvaluator 并行执行多个 evaluator 并合并 metrics，EvaluatorFactory 支持 evaluation.backends 配置驱动组合 |
-| H3 | EvalRunner + Golden Test Set | [x] | 2026-07-24 | EvalRunner 可读取 golden_test_set.json，批量执行 HybridSearch 与 evaluator，输出聚合 EvalReport，并新增 scripts/evaluate.py |
-| H4 | 评估面板页面 | [x] | 2026-07-24 | Dashboard Evaluation Panel 完成，支持选择 golden test set、运行 EvalRunner、展示汇总 metrics 与 case 明细 |
-| H5 | Recall 回归测试（E2E） | [x] | 2026-07-27 | 新增 golden set recall E2E，基于 EvalRunner + CustomEvaluator 固定 hit_rate/mrr 阈值，防止检索召回回归 |
+| H1 | RagasEvaluator 实现 | [ ] | | |
+| H2 | CompositeEvaluator 实现 | [ ] | | |
+| H3 | EvalRunner + Golden Test Set | [ ] | | |
+| H4 | 评估面板页面 | [ ] | | |
+| H5 | Recall 回归测试（E2E） | [ ] | | |
 
 #### 阶段 I：端到端验收与文档收口
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| I1 | E2E：MCP Client 侧调用模拟 | [x] | 2026-07-27 | 新增 MCP stdio 子进程 E2E，模拟 initialize、tools/list、tools/call query_knowledge_hub 并验证 citations 返回 |
-| I2 | E2E：Dashboard 冒烟测试 | [x] | 2026-07-27 | 新增 Streamlit AppTest Dashboard 冒烟测试，覆盖 6 个页面；无 Streamlit 环境下明确 skip |
-| I3 | 完善 README（运行说明 + MCP + Dashboard） | [x] | 2026-07-27 | README 已重写为开箱使用指南，覆盖快速开始、settings.yaml、MCP 配置、Dashboard、评估、测试与 FAQ |
-| I4 | 清理接口一致性（契约测试补齐） | [x] | 2026-07-27 | 契约测试补齐完成，覆盖 VectorStore delete_by_metadata、Reranker factory/NoneReranker、CustomEvaluator 与 DocumentManager 边界 |
-| I5 | 全链路 E2E 验收 | [x] | 2026-07-27 | 新增离线 full-chain acceptance E2E，覆盖 ingest -> query -> evaluate；MCP/Dashboard/Recall E2E 同步通过，真实 OpenAI 环境因 API 401 需用户更新 Key 后复验 |
+| I1 | E2E：MCP Client 侧调用模拟 | [ ] | | |
+| I2 | E2E：Dashboard 冒烟测试 | [ ] | | |
+| I3 | 完善 README（运行说明 + MCP + Dashboard） | [ ] | | |
+| I4 | 清理接口一致性（契约测试补齐） | [ ] | | |
+| I5 | 全链路 E2E 验收 | [ ] | | |
 
 ---
 
@@ -2068,14 +2068,14 @@ dashboard:
 |------|---------|--------|------|
 | 阶段 A | 3 | 3 | 100% |
 | 阶段 B | 16 | 16 | 100% |
-| 阶段 C | 15 | 15 | 100% |
-| 阶段 D | 7 | 7 | 100% |
-| 阶段 E | 6 | 6 | 100% |
-| 阶段 F | 5 | 5 | 100% |
-| 阶段 G | 6 | 6 | 100% |
-| 阶段 H | 5 | 5 | 100% |
-| 阶段 I | 5 | 5 | 100% |
-| **总计** | **68** | **68** | **100%** |
+| 阶段 C | 15 | 0 | 0% |
+| 阶段 D | 7 | 0 | 0% |
+| 阶段 E | 6 | 0 | 0% |
+| 阶段 F | 5 | 0 | 0% |
+| 阶段 G | 6 | 0 | 0% |
+| 阶段 H | 5 | 0 | 0% |
+| 阶段 I | 5 | 0 | 0% |
+| **总计** | **68** | **19** | **28%** |
 
 
 ---
